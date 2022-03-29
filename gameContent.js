@@ -5,8 +5,11 @@ window.addEventListener( 'resize', onWindowResize );
 initializePlanes();
 initializeLights();
 
-var mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('ice_resources', new THREE.Vector2(1, 1), 0.002, new THREE.Vector2(1, 1)), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
-var secondarySphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('tiles_resources', new THREE.Vector2(2, 2), 0.03, new THREE.Vector2(2, 1)), createVectorUtility(0.15, 0, -0.15), createEulerUtility(0, 0, 0), true, false);
+//var mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('ice_resources', new THREE.Vector2(1, 1), 0.002, new THREE.Vector2(1, 1)), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
+//var secondarySphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('tiles_resources', new THREE.Vector2(2, 2), 0.03, new THREE.Vector2(2, 1)), createVectorUtility(0.15, 0, -0.15), createEulerUtility(0, 0, 0), true, false);
+
+var mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createCustomMaterialUtility(), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
+var secondarySphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createCustomMaterialUtility(), createVectorUtility(0.15, 0, -0.15), createEulerUtility(0, 0, 0), true, false);
 
 function initializePlanes() {
 	var material = new THREE.MeshStandardMaterial( {color: 0xffffff} );

@@ -42,6 +42,22 @@ function createPBRMaterialUtility(folderName, normalScale, heightScale, tiling)
 	return material;
 }
 
+function createCustomMaterialUtility() {
+    uniforms = {
+        u_time: { type: "f", value: 1.0 },
+        u_resolution: { type: "v2", value: new THREE.Vector2() },
+        u_mouse: { type: "v2", value: new THREE.Vector2() }
+    };
+
+    var material = new THREE.ShaderMaterial( {
+        uniforms: uniforms,
+        vertexShader: fetch("basicVertex.glsl").text,
+        fragmentShader: fetch("basicFragment.glsl").text
+    } );
+
+    return material;
+}
+
 function loadTextureUtility(folderName, textureName, tiling)
 {
 	var texture = new THREE.TextureLoader().load( 'scene-content/' + folderName + '/' + textureName );
