@@ -1,15 +1,34 @@
-camera = initializeCamera(createVectorUtility(0.6, 0.1, 0.6), createEulerUtility(-10, 45, 0, "YXZ"));
-renderer.setAnimationLoop( update );
-window.addEventListener( 'resize', onWindowResize );
+fetch("./basicVertex.glsl").then(function(response) {
+	return response.text().then(function(text) {
+		VERTEX_SHADER = text;
+		onShaderLoaded();
+	});
+});
 
-initializePlanes();
-initializeLights();
+fetch("./basicFragment.glsl").then(function(response) {
+	return response.text().then(function(text) {
+		FRAGMENT_SHADER = text;
+		onShaderLoaded();
+	});
+});
 
-//var mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('ice_resources', new THREE.Vector2(1, 1), 0.002, new THREE.Vector2(1, 1)), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
-//var secondarySphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('tiles_resources', new THREE.Vector2(2, 2), 0.03, new THREE.Vector2(2, 1)), createVectorUtility(0.15, 0, -0.15), createEulerUtility(0, 0, 0), true, false);
+let mainSphere, secondarySphere;
 
-var mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createCustomMaterialUtility(), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
-var secondarySphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createCustomMaterialUtility(), createVectorUtility(0.15, 0, -0.15), createEulerUtility(0, 0, 0), true, false);
+function initializeGameContent() {
+	camera = initializeCamera(createVectorUtility(0.6, 0.1, 0.6), createEulerUtility(-10, 45, 0, "YXZ"));
+
+	initializePlanes();
+	initializeLights();
+
+	//mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('ice_resources', new THREE.Vector2(1, 1), 0.002, new THREE.Vector2(1, 1)), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
+	//secondarySphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('tiles_resources', new THREE.Vector2(2, 2), 0.03, new THREE.Vector2(2, 1)), createVectorUtility(0.15, 0, -0.15), createEulerUtility(0, 0, 0), true, false);
+
+	mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createCustomMaterialUtility('ice_resources', 1.0, 1.0, new THREE.Vector2(1, 1)), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
+	secondarySphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createCustomMaterialUtility('tiles_resources', 1.0, 1.0, new THREE.Vector2(2, 2)), createVectorUtility(0.15, 0, -0.15), createEulerUtility(0, 0, 0), true, false);
+
+	renderer.setAnimationLoop( update );
+	window.addEventListener( 'resize', onWindowResize );
+}
 
 function initializePlanes() {
 	var material = new THREE.MeshStandardMaterial( {color: 0xffffff} );
@@ -39,4 +58,10 @@ function onWindowResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth, window.innerHeight );
+}
+
+function onShaderLoaded() {
+	if(VERTEX_SHADER != "" && FRAGMENT_SHADER != "") {
+		initializeGameContent();
+	}
 }

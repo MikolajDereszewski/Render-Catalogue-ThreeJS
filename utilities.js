@@ -42,17 +42,19 @@ function createPBRMaterialUtility(folderName, normalScale, heightScale, tiling)
 	return material;
 }
 
-function createCustomMaterialUtility() {
+function createCustomMaterialUtility(folderName, normalScale, heightScale, tiling) {
+	var basemap = loadTextureUtility(folderName, 'basemap.png', tiling);
+	var normalmap = loadTextureUtility(folderName, 'normal.png', tiling);
     uniforms = {
-        u_time: { type: "f", value: 1.0 },
-        u_resolution: { type: "v2", value: new THREE.Vector2() },
-        u_mouse: { type: "v2", value: new THREE.Vector2() }
+        u_basemap: { type: "t", value: basemap },
+		u_normalmap: {type: "t", value: normalmap},
+		u_normalScale: {type: "f", value: normalScale}
     };
 
     var material = new THREE.ShaderMaterial( {
         uniforms: uniforms,
-        vertexShader: fetch("basicVertex.glsl").text,
-        fragmentShader: fetch("basicFragment.glsl").text
+        vertexShader: VERTEX_SHADER,
+        fragmentShader: FRAGMENT_SHADER
     } );
 
     return material;
