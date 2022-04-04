@@ -28,6 +28,8 @@ function createPBRMaterialUtility(folderName, normalScale, heightScale, tiling)
 	var roughness = loadTextureUtility(folderName, 'roughness.png', tiling);
 	var height = loadTextureUtility(folderName, 'height.png', tiling);
 
+	var cubemap = loadCubemapUtility("environment", "env");
+
 	var material = new THREE.MeshStandardMaterial({
 		color: 0xffffff,
 		map: baseColor,
@@ -36,7 +38,8 @@ function createPBRMaterialUtility(folderName, normalScale, heightScale, tiling)
 		metalnessMap: metallic,
 		roughnessMap: roughness,
 		displacementMap: height,
-		displacementScale: heightScale
+		displacementScale: heightScale,
+		envMap: cubemap
 	});
 
 	return material;
@@ -45,27 +48,49 @@ function createPBRMaterialUtility(folderName, normalScale, heightScale, tiling)
 function createCustomMaterialUtility(folderName, normalScale, heightScale, tiling) {
 	var basemap = loadTextureUtility(folderName, 'basemap.png', tiling);
 	var normalmap = loadTextureUtility(folderName, 'normal.png', tiling);
+	var heightmap = loadTextureUtility(folderName, 'height.png', tiling);
     uniforms = {
         u_basemap: { type: "t", value: basemap },
 		u_normalmap: {type: "t", value: normalmap},
-		u_normalScale: {type: "f", value: normalScale}
+		u_heightmap: {type: "t", value: heightmap},
+		u_normalScale: {type: "f", value: normalScale},
+		u_heightScale: {type: "f", value: heightScale}
     };
+	
+	uniforms = THREE.UniformsUtils.merge([
+		THREE.UniformsLib['lights'],
+		uniforms]);
 
     var material = new THREE.ShaderMaterial( {
         uniforms: uniforms,
         vertexShader: VERTEX_SHADER,
-        fragmentShader: FRAGMENT_SHADER
+        fragmentShader: FRAGMENT_SHADER,
+		lights: true,
+		shading: THREE.SmoothShading
     } );
 
     return material;
 }
 
-function loadTextureUtility(folderName, textureName, tiling)
-{
+function loadTextureUtility(folderName, textureName, tiling) {
 	var texture = new THREE.TextureLoader().load( 'scene-content/' + folderName + '/' + textureName );
 	texture.repeat = tiling;
 	texture.wrapS = THREE.RepeatWrapping;
 	texture.wrapT = THREE.RepeatWrapping;
+	return texture;
+}
+
+function loadCubemapUtility(folderName, textureName) {
+	var texture = new THREE.CubeTextureLoader()
+	.setPath( 'scene-content/' + folderName + '/' )
+	.load( [
+		textureName + 'px.png',
+		textureName + 'nx.png',
+		textureName + 'py.png',
+		textureName + 'ny.png',
+		textureName + 'pz.png',
+		textureName + 'nz.png'
+	] );
 	return texture;
 }
 

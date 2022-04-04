@@ -1,10 +1,27 @@
+//Variables
+varying vec3 vPos;
+varying vec2 vUv;
+varying vec3 vNormal;
+
+//Texturing
 uniform sampler2D u_basemap;
 uniform sampler2D u_normalmap;
 uniform float u_normalScale;
 
-varying vec2 vUv;
-varying mediump vec3 vNormal;
+//Lighting
+struct PointLight 
+{
+    vec3 position;
+    vec3 color;
+};
 
+uniform PointLight pointLights[ NUM_POINT_LIGHTS ];
+
+varying vec3 vTangent;
+varying vec3 vBitangent;
+varying vec3 vLL [ NUM_POINT_LIGHTS ];
+
+//
 float saturate(float x)
 {
     return max(0.0, min(1.0, x));
@@ -12,30 +29,41 @@ float saturate(float x)
 
 vec3 CalculateNormalsValue()
 {
-	vec4 normalColor = texture2D(u_normalmap, vUv);
-	vec3 normal;
-	normal.xy = (normalColor.wy * 2.0 - 1.0);
-	normal.xy *= u_normalScale * 2.0;
-	normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
+    vec3 normalTex = texture2D (u_normalmap, vUv).xyz * 2.0 - 1.0;
+    normalTex.xy *= u_normalScale;
+    normalTex.y *= -1.0;
+    normalTex = normalize( normalTex );
+    mat3 tsb = mat3( normalize( vTangent ), normalize( vBitangent ), normalize( vNormal ) );
+    vec3 normal = tsb * normalTex;
+
+    //DXT5nm encoding
+    //normal.xy = texture2D(u_normalmap, vUv).wy * 2.0 - 1.0;
+	//normal.xy *= u_normalScale;
+	//normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
+    //normal = normal.xzy;
+
+    //RGB encoding
+    //vec3 normal = texture2D(u_normalmap, vUv).rgb;
+	//normal = normalize(normal);
+    //normal = normal * 2.0 - 1.0;
+    //normal = normal.xzy;
 	return normal;
 }
 
 void main()
 {
-    mediump vec3 light = vec3(0.5, 0.2, 1.0);
+    vec4 color = texture2D(u_basemap, vUv);
+    vec3 textureNormal = CalculateNormalsValue();
 
-    // ensure it's normalized
-    light = normalize(light);
+    vec4 addedLights = vec4(0.1, 0.1, 0.1, 1.0);
+    for(int l = 0; l < NUM_POINT_LIGHTS; l++)
+    {
+        vec3 adjustedLight = pointLights[l].position + cameraPosition;
+        vec3 lightDirection = normalize(vPos - adjustedLight);
+        addedLights.rgb += clamp(dot(-lightDirection, textureNormal) * pointLights[l].color, 0.0, 1.0);
+    }
 
-    // calculate the dot product of
-    // the light to the vertex normal
-    mediump float dProd = max(0.0, dot(CalculateNormalsValue(), light));
-
-    vec4 basemapColor = texture2D(u_basemap, vUv);
-    // feed into our frag colour
-    gl_FragColor = vec4(dProd * basemapColor.r, // R
-                        dProd * basemapColor.g, // G
-                        dProd * basemapColor.b, // B
-                        1.0);  // A
-    //gl_FragColor = basemapColor;
+    color *= addedLights;
+    color.a = 1.0;
+    gl_FragColor = color;
 }

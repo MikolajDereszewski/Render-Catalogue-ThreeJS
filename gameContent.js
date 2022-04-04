@@ -20,11 +20,14 @@ function initializeGameContent() {
 	initializePlanes();
 	initializeLights();
 
+	var sphereGeometry = new THREE.SphereGeometry( 0.2, 250, 250 );
+	sphereGeometry.computeTangents();
+
 	//mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('ice_resources', new THREE.Vector2(1, 1), 0.002, new THREE.Vector2(1, 1)), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
 	//secondarySphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('tiles_resources', new THREE.Vector2(2, 2), 0.03, new THREE.Vector2(2, 1)), createVectorUtility(0.15, 0, -0.15), createEulerUtility(0, 0, 0), true, false);
-
-	mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createCustomMaterialUtility('ice_resources', 1.0, 1.0, new THREE.Vector2(1, 1)), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
-	secondarySphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createCustomMaterialUtility('tiles_resources', 1.0, 1.0, new THREE.Vector2(2, 2)), createVectorUtility(0.15, 0, -0.15), createEulerUtility(0, 0, 0), true, false);
+	
+	mainSphere = createGeometryUtility(sphereGeometry, createCustomMaterialUtility('ice_resources', 1.0, 0.002, new THREE.Vector2(1, 1)), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
+	secondarySphere = createGeometryUtility(sphereGeometry, createCustomMaterialUtility('tiles_resources', 1.0, 0.03, new THREE.Vector2(2, 2)), createVectorUtility(0.15, 0, -0.15), createEulerUtility(0, 0, 0), true, false);
 
 	renderer.setAnimationLoop( update );
 	window.addEventListener( 'resize', onWindowResize );
