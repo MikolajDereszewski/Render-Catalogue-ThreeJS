@@ -3,6 +3,9 @@ varying vec3 vPos;
 varying vec2 vUv;
 varying vec3 vNormal;
 
+varying vec3 vViewPosition;
+varying vec3 vViewNormal;
+
 //Vertex displacement
 uniform sampler2D u_heightmap;
 uniform float u_heightScale;
@@ -37,6 +40,9 @@ void main()
     {
         vLL[l] = normalize (normalMatrix * (pointLights[l].position - vPos));
     }
+
+    vViewPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
+	vViewNormal = normalMatrix * normal.xyz;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position + height,1.0);
 }
