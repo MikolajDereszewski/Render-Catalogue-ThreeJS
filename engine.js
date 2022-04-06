@@ -1,7 +1,7 @@
 const DEG2RAD = Math.PI / 180;
 const RAD2DEG = 180 / Math.PI;
 const SHADOW_MAP_RESOLUTION = 2048;
-const DEBUG_MODE = false;
+const DEBUG_MODE = true;
 
 let VERTEX_SHADER = "", FRAGMENT_SHADER = "";
 let scene, renderer, statistics, camera;

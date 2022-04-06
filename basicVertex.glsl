@@ -9,6 +9,7 @@ varying vec3 vViewNormal;
 //Vertex displacement
 uniform sampler2D u_heightmap;
 uniform float u_heightScale;
+uniform vec2 u_tiling;
 
 //Lighting
 attribute vec4 tangent;
@@ -28,9 +29,8 @@ varying vec3 vLL [ NUM_POINT_LIGHTS ];
 //
 void main()
 {
-    vUv = uv;
+    vUv = vec2(uv.x * u_tiling.x, uv.y * u_tiling.y);
     vNormal = normalize( normalMatrix * normal );
-
     vec3 height = texture2D (u_heightmap, vUv).r * normal * u_heightScale;
     vPos = (modelMatrix * vec4(position, 1.0 )).xyz;
 

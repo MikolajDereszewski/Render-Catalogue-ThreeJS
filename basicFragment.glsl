@@ -8,6 +8,7 @@ varying vec3 vNormal;
 //Texturing
 uniform sampler2D u_basemap;
 uniform sampler2D u_normalmap;
+uniform sampler2D u_roughness;
 uniform float u_normalScale;
 
 //Lighting
@@ -24,15 +25,6 @@ varying vec3 vBitangent;
 varying vec3 vLL [ NUM_POINT_LIGHTS ];
 
 //PBR
-uniform vec3 u_lightColor;
-uniform vec3 u_lightDir;
-uniform vec3 u_lightPos;
-uniform vec3 u_viewPos;
-uniform vec3 u_diffuseColor;
-uniform float u_roughness;
-uniform float u_fresnel;
-uniform float u_alpha;
-uniform vec3 u_ambientColor;
 uniform samplerCube u_tCube;
 uniform float u_time;
 
@@ -148,11 +140,11 @@ vec3 ImportanceSampleGGX( vec2 Xi, float Roughness, vec3 N )
 }
 
 
-vec3 SpecularIBL( float Roughness, vec3 NL, vec3 V, float fresnel )
+vec3 SpecularIBL( float Roughness, vec3 NL, vec3 V, float fresnel)
 {
 	//L: viewLightDir
 	//H: halfVector
-	//V: viewNormal
+	//NL: viewNormal
 	//V: viewDir
 
 	vec3 SpecularLighting = vec3(0.0);
@@ -170,7 +162,7 @@ vec3 SpecularIBL( float Roughness, vec3 NL, vec3 V, float fresnel )
 
 		if( NoL > 0.0 )
 		{
-			vec3 SampleColor = textureCube (u_tCube, L).xyz;
+			vec3 SampleColor = vec3(1.0,1.0,1.0);//textureCube (u_tCube, L).xyz;
 
 			float fresnel_fn = CalculateFresnel(fresnel, L, H);
 			float ndf_fn = NDFBeckmann(Roughness, NL, H, NoH);
@@ -182,44 +174,71 @@ vec3 SpecularIBL( float Roughness, vec3 NL, vec3 V, float fresnel )
 	return SpecularLighting / float(NumSamples);
 }
 
-vec3 dirDiffuse = vec3(0.0);
-vec3 dirSpecular = vec3(0.0);
-
-void calDirLight(vec3 lDir, vec3 normal, vec3 diffuse, vec3 specular)
-{
-	vec3 dirLightColor = vec3(1.0);
-
-	vec4 lDirection = viewMatrix * vec4( lDir, 0.0 );
-	vec3 dirVector = normalize( lDirection.xyz );
-
-	float dirDiffuseWeight = max(dot( normal, dirVector ), 0.0);
-
-	dirDiffuse += diffuse * dirLightColor * dirDiffuseWeight * 0.5;
-
-	vec3 dirHalfVector = normalize( dirVector + vViewPosition );
-	float dirDotNormalHalf = max( dot( normal, dirHalfVector ), 0.0 );
-	float dirSpecularWeight = 0.5 * max( pow( dirDotNormalHalf, 0.0 ), 0.0 );
-
-	float specularNormalization = ( 0.0 + 2.0 ) / 8.0;
-
-	vec3 schlick = specular + vec3( 1.0 - specular ) * pow( max( 1.0 - dot( dirVector, dirHalfVector ), 0.0 ), 5.0 );
-	dirSpecular += schlick * dirLightColor * dirSpecularWeight * dirDiffuseWeight * specularNormalization;
-}
-
 void main()
 {
+	vec3 viewPosition = normalize(vViewPosition);
+	vec3 normal = normalize(vNormal.xyz);
+	vec3 viewNormal = normalize(vViewNormal.xyz);
+	vec3 viewDir = normalize(-vViewPosition);
+
+	float roughness = 0.1;//clamp(texture2D(u_roughness, vUv).r, 0.001, 1.0);
     vec4 color = texture2D(u_basemap, vUv);
     vec3 textureNormal = CalculateNormalsValue();
 
-    vec4 addedLights = vec4(0.1, 0.1, 0.1, 1.0);
+    vec3 diffuseLight = vec3(0.0, 0.0, 0.0);
+	vec3 specularLight = vec3(0.0, 0.0, 0.0);
     for(int l = 0; l < NUM_POINT_LIGHTS; l++)
     {
-        vec3 adjustedLight = pointLights[l].position + cameraPosition;
+		vec3 adjustedLight = pointLights[l].position + cameraPosition;
         vec3 lightDirection = normalize(vPos - adjustedLight);
-        addedLights.rgb += clamp(dot(-lightDirection, textureNormal) * pointLights[l].color, 0.0, 1.0);
-    }
+		float diffuse = max(dot(normalize(-lightDirection), textureNormal), 0.0);
 
-    color *= addedLights;
+		vec4 viewLightPos = viewMatrix * vec4( pointLights[l].position, 1.0 );
+		vec3 viewLightDir = viewLightPos.xyz - viewPosition.xyz;
+		viewLightDir = normalize(viewLightDir);
+
+		vec3 halfVec = normalize(viewDir + viewLightDir);
+		float NoL = max(dot(textureNormal, viewDir), 0.0);
+
+		float fresnel_value = 1.2;
+		float fresnel = pow((1.0 - fresnel_value) / (1.0 + fresnel_value), 2.0);
+		float fresnel_fn = CalculateFresnel(fresnel, viewLightDir, halfVec);
+
+		vec3 specularColor = SpecularIBL(roughness, textureNormal, viewDir, fresnel);
+		
+		diffuseLight += clamp(diffuse * (1.0 - fresnel_fn) * pointLights[l].color, 0.0, 1.0);
+		specularLight += specularColor * pointLights[l].color * NoL;
+        //diffuseLight += clamp(dot(-lightDirection, textureNormal) * pointLights[l].color, 0.0, 1.0);
+    }
+    color.rgb = color.rgb * diffuseLight + specularLight;
     color.a = 1.0;
     gl_FragColor = color;
 }
+
+/*void main()	{
+		//		viewMatrix
+		//		cameraPosition
+				vec3 viewPosition = normalize(vViewPosition);
+				vec4 viewLightPos = viewMatrix * vec4( u_lightPos, 1.0 );
+				vec3 viewLightDir = viewLightPos.xyz - viewPosition.xyz;
+				viewLightDir = normalize(viewLightDir);
+
+				vec3 normal = normalize(vNormal.xyz);
+				vec3 viewNormal = normalize(vViewNormal.xyz);
+				vec3 viewDir = normalize(-vViewPosition);
+				vec3 halfVec = normalize(viewDir + viewLightDir);
+				float diffuse = max(dot(normalize(-u_lightDir), normal), 0.0);
+
+				float NoL= max(dot(viewNormal, viewLightDir), 0.0);
+
+				float fresnel = pow((1.0 - u_fresnel) / (1.0 + u_fresnel), 2.0);
+
+				float fresnel_fn = F(fresnel, viewLightDir, halfVec);
+
+				vec3 specularColor = SpecularIBL(u_alpha, viewNormal, viewDir, fresnel);
+
+				vec3 specColor = specularColor * NoL + dirSpecular;
+				vec3 diffuseColor = u_diffuseColor * diffuse * (1.0 - fresnel_fn) * u_lightColor + dirDiffuse;
+
+				gl_FragColor = vec4( diffuseColor + specColor + u_ambientColor * u_diffuseColor, 1.0);
+			}*/

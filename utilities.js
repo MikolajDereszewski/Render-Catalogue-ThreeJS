@@ -39,7 +39,7 @@ function createPBRMaterialUtility(folderName, normalScale, heightScale, tiling)
 		roughnessMap: roughness,
 		displacementMap: height,
 		displacementScale: heightScale,
-		envMap: cubemap
+		//envMap: cubemap
 	});
 
 	return material;
@@ -48,13 +48,16 @@ function createPBRMaterialUtility(folderName, normalScale, heightScale, tiling)
 function createCustomMaterialUtility(folderName, normalScale, heightScale, tiling) {
 	var basemap = loadTextureUtility(folderName, 'basemap.png', tiling);
 	var normalmap = loadTextureUtility(folderName, 'normal.png', tiling);
+	var roughness = loadTextureUtility(folderName, 'roughness.png', tiling);
 	var heightmap = loadTextureUtility(folderName, 'height.png', tiling);
     uniforms = {
         u_basemap: { type: "t", value: basemap },
 		u_normalmap: {type: "t", value: normalmap},
 		u_heightmap: {type: "t", value: heightmap},
 		u_normalScale: {type: "f", value: normalScale},
-		u_heightScale: {type: "f", value: heightScale}
+		u_roughness: {type: "t", value: roughness},
+		u_heightScale: {type: "f", value: heightScale},
+		u_tiling: {type: "v2", value: tiling},
     };
 	
 	uniforms = THREE.UniformsUtils.merge([
