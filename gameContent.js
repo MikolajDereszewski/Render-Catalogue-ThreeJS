@@ -12,13 +12,18 @@ fetch("./basicFragment.glsl").then(function(response) {
 	});
 });
 
+let controls;
 let mainSphere, secondarySphere;
 
 function initializeGameContent() {
 	camera = initializeCamera(createVectorUtility(0.6, 0.1, 0.6), createEulerUtility(-10, 45, 0, "YXZ"));
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
+	controls.update();
 
 	initializePlanes();
 	initializeLights();
+	var cubemap = loadCubemapUtility("environment", "env");
+	scene.background = cubemap;
 
 	var sphereGeometry = new THREE.SphereGeometry( 0.2, 500, 500 );
 	sphereGeometry.computeTangents();
@@ -51,6 +56,8 @@ function initializeLights() {
 function update( time ) {
 	mainSphere.rotation.y = time / 4000;
 	secondarySphere.rotation.y = time / 4000;
+
+	controls.update();
 	renderer.render( scene, camera );
 	if(DEBUG_MODE) {
 		statistics.update();
