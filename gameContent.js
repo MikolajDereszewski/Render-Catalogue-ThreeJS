@@ -80,12 +80,12 @@ function initializeProperties() {
 			sphereMaterial.uniforms['u_tiling'].value.y = Math.round(materialUniforms.u_tiling.value.y);
 		}
 	);
-	propertyGUI.add(materialUniforms.u_roughnessRemap.value, 'x', 0.0, 1.0).listen().name("Rough Remap Min").onChange(
+	propertyGUI.add(materialUniforms.u_roughnessRemap.value, 'x', 0.0, 1.0).listen().name("R Remap Min").onChange(
 		function() {
 			sphereMaterial.uniforms['u_roughnessRemap'].value.x = materialUniforms.u_roughnessRemap.value.x;
 		}
 	);
-	propertyGUI.add(materialUniforms.u_roughnessRemap.value, 'y', 0.0, 1.0).listen().name("Rough Remap Max").onChange(
+	propertyGUI.add(materialUniforms.u_roughnessRemap.value, 'y', 0.0, 1.0).listen().name("R Remap Max").onChange(
 		function() {
 			sphereMaterial.uniforms['u_roughnessRemap'].value.y = materialUniforms.u_roughnessRemap.value.y;
 		}
