@@ -53,19 +53,22 @@ function createCustomMaterialUtility(folderName, normalScale, heightScale, tilin
 	var normalmap = loadTextureUtility(folderName, 'normal.png', tiling);
 	var roughness = loadTextureUtility(folderName, 'roughness.png', tiling);
 	var heightmap = loadTextureUtility(folderName, 'height.png', tiling);
+	var AO = loadTextureUtility(folderName, 'AO.png', tiling);
 
     uniforms = {
         u_basemap: { type: "t", value: basemap },
 		u_normalmap: {type: "t", value: normalmap },
 		u_heightmap: {type: "t", value: roughness },
 		u_roughness: {type: "t", value: heightmap },
+		u_AO: {type: "t", value: AO},
 		u_envMap: {type: "t", value: scene.background},
 
 		u_normalScale: {type: "f", value: normalScale},
 		u_heightScale: {type: "f", value: heightScale},
+		u_AOScale: {type: "f", value: 1.0},
 		u_tiling: {type: "v2", value: tiling},
 		
-		u_roughnessRemap: {type: "v2", value: new THREE.Vector2(0.0, 1.0)}
+		u_roughnessRemap: {type: "v2", value: new THREE.Vector2(0.0, 1.0)},
     };
 	
 	materialUniforms = THREE.UniformsUtils.merge([

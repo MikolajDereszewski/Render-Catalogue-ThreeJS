@@ -20,7 +20,7 @@ function initializeGameContent() {
 	camera = initializeCamera(createVectorUtility(0.6, 0.1, 0.6), createEulerUtility(-10, 45, 0, "YXZ"));
 	initializeControls();
 	initializeEnvironment();
-	initializeSphere('tiles_resources');
+	initializeSphere('ice_resources');
 	initializeProperties();
 	renderer.setAnimationLoop( update );
 	window.addEventListener( 'resize', onWindowResize );
@@ -45,10 +45,12 @@ function reloadMaterialTextures(folderName, tiling) {
 		var normalmap = loadTextureUtility(folderName, 'normal.png', tiling);
 		var roughness = loadTextureUtility(folderName, 'roughness.png', tiling);
 		var heightmap = loadTextureUtility(folderName, 'height.png', tiling);
+		var AO = loadTextureUtility(folderName, 'AO.png', tiling);
 		sphereMaterial.uniforms['u_basemap'].value = basemap;
 		sphereMaterial.uniforms['u_normalmap'].value = normalmap;
 		sphereMaterial.uniforms['u_roughness'].value = roughness;
 		sphereMaterial.uniforms['u_heightmap'].value = heightmap;
+		sphereMaterial.uniforms['u_AO'].value = AO;
 	}
 }
 
@@ -63,22 +65,27 @@ function initializeProperties() {
 			sphereMaterial.uniforms['u_heightScale'].value = materialUniforms.u_heightScale.value;
 		}
 	);
+	propertyGUI.add(materialUniforms.u_AOScale, 'value', 0.0, 1.0).listen().name("AO Intensity").onChange(
+		function() {
+			sphereMaterial.uniforms['u_AOScale'].value = materialUniforms.u_AOScale.value;
+		}
+	);
 	propertyGUI.add(materialUniforms.u_tiling.value, 'x', 1, 10).listen().name("Tiling X").onChange(
 		function() {
-			sphereMaterial.uniforms['u_tiling'].value.x = materialUniforms.u_tiling.value.x;
+			sphereMaterial.uniforms['u_tiling'].value.x = Math.round(materialUniforms.u_tiling.value.x);
 		}
 	);
 	propertyGUI.add(materialUniforms.u_tiling.value, 'y', 1, 10).listen().name("Tiling Y").onChange(
 		function() {
-			sphereMaterial.uniforms['u_tiling'].value.y = materialUniforms.u_tiling.value.y;
+			sphereMaterial.uniforms['u_tiling'].value.y = Math.round(materialUniforms.u_tiling.value.y);
 		}
 	);
-	propertyGUI.add(materialUniforms.u_roughnessRemap.value, 'x', 0.0, 1.0).listen().name("Remap Min").onChange(
+	propertyGUI.add(materialUniforms.u_roughnessRemap.value, 'x', 0.0, 1.0).listen().name("Rough Remap Min").onChange(
 		function() {
 			sphereMaterial.uniforms['u_roughnessRemap'].value.x = materialUniforms.u_roughnessRemap.value.x;
 		}
 	);
-	propertyGUI.add(materialUniforms.u_roughnessRemap.value, 'y', 0.0, 1.0).listen().name("Remap Max").onChange(
+	propertyGUI.add(materialUniforms.u_roughnessRemap.value, 'y', 0.0, 1.0).listen().name("Rough Remap Max").onChange(
 		function() {
 			sphereMaterial.uniforms['u_roughnessRemap'].value.y = materialUniforms.u_roughnessRemap.value.y;
 		}
@@ -87,12 +94,19 @@ function initializeProperties() {
 	var loadIce = { add : function() {
 		reloadMaterialTextures("ice_resources", new THREE.Vector2(1, 1));
 	}};
+	propertyGUI.add(loadIce,'add').name("Load Ice");
 	var loadTiles = { add : function() {
 		reloadMaterialTextures("tiles_resources", new THREE.Vector2(2, 1));
 	}};
-
-	propertyGUI.add(loadIce,'add').name("Load Ice");
 	propertyGUI.add(loadTiles,'add').name("Load Tiles");
+	var loadTiles = { add : function() {
+		reloadMaterialTextures("rock_resources", new THREE.Vector2(2, 2));
+	}};
+	propertyGUI.add(loadTiles,'add').name("Load Rock");
+	var loadTiles = { add : function() {
+		reloadMaterialTextures("brick_resources", new THREE.Vector2(2, 2));
+	}};
+	propertyGUI.add(loadTiles,'add').name("Load Bricks");
 }
 
 function initializeEnvironment() {

@@ -10,8 +10,10 @@ struct PointLight
 uniform sampler2D u_basemap;
 uniform sampler2D u_normalmap;
 uniform sampler2D u_roughness;
+uniform sampler2D u_AO;
 uniform samplerCube u_envMap;
 uniform float u_normalScale;
+uniform float u_AOScale;
 uniform vec2 u_roughnessRemap;
 
 uniform PointLight pointLights[ NUM_POINT_LIGHTS ];
@@ -100,6 +102,8 @@ void main()
 	vec3 diffuseColor = texture2D(u_basemap, vUv).rgb * diffuseLight * fresnel;
 	vec3 specularColor = specularLight * smoothness;
     vec3 reflectionColor = getLightProbeIndirectRadiance(viewDir, normal, roughness) * (1.0 - fresnel);
+    float ambientOcclusion = 1.0 - u_AOScale + u_AOScale * texture2D(u_AO, vUv).r;
 
-    gl_FragColor = vec4(diffuseColor + specularColor + reflectionColor, 1.0);
+    vec3 finalColor = (diffuseColor + specularColor + reflectionColor) * ambientOcclusion;
+    gl_FragColor = vec4(finalColor, 1.0);
 }
