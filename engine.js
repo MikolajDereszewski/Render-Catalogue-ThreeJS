@@ -5,6 +5,7 @@ const DEBUG_MODE = true;
 
 let VERTEX_SHADER = "", FRAGMENT_SHADER = "";
 let scene, renderer, statistics, camera;
+let GUI;
 
 initializeEngine();
 initializeDebugger();
@@ -12,7 +13,13 @@ initializeDebugger();
 function initializeEngine() {
 	scene = initializeScene();
 	renderer = initializeRenderer();
+	propertyGUI = initializeGui();
 }
+
+function initializeGui() {
+	var gui = new dat.GUI();
+	return gui;
+  }
 
 function initializeDebugger() {
 	if(DEBUG_MODE) {

@@ -10,8 +10,9 @@ struct PointLight
 uniform sampler2D u_basemap;
 uniform sampler2D u_normalmap;
 uniform sampler2D u_roughness;
-uniform samplerCube u_tCube;
+uniform samplerCube u_envMap;
 uniform float u_normalScale;
+uniform vec2 u_roughnessRemap;
 
 uniform PointLight pointLights[ NUM_POINT_LIGHTS ];
 
@@ -56,7 +57,7 @@ vec3 getLightProbeIndirectRadiance(vec3 viewDir, vec3 normal, float roughness)
     float specularMIPLevel = getSpecularMIPLevel( blinnShininessExponent );
                 
     vec3 queryReflectVec = vec3( reflectVec.x, reflectVec.yz );
-    vec4 envMapColor = textureCube( u_tCube, queryReflectVec, specularMIPLevel );
+    vec4 envMapColor = textureCube( u_envMap, queryReflectVec, specularMIPLevel );
                 
     return envMapColor.rgb * .75;
 }
@@ -77,8 +78,8 @@ void main()
 	vec3 normal = CalculateNormalsValue();
 	vec3 viewDir = normalize(-vPos);
 
-	float roughness = clamp(texture2D(u_roughness, vUv).r, 0.001, 1.0);
-	float smoothness = 1.0 - roughness;
+	float roughness = clamp(u_roughnessRemap.x + (u_roughnessRemap.y - u_roughnessRemap.x) * texture2D(u_roughness, vUv).r, 0.001, 1.0);
+	float smoothness = clamp(1.0 - roughness, 0.001, 1.0);
 
     vec3 diffuseLight = vec3(0.0, 0.0, 0.0);
 	vec3 specularLight = vec3(0.0, 0.0, 0.0);

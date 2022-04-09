@@ -1,3 +1,8 @@
+let materialUniforms = {
+	u_normalScale: {type: "f", value: 1.0},
+	u_heightScale: {type: "f", value: 0.0}
+};
+
 function createGeometryUtility(geometry, material, position = new THREE.Vector3(0,0,0), rotation = new THREE.Euler(0,0,0), castShadow, receiveShadow) {
 	var mesh = new THREE.Mesh( geometry, material );
 	mesh.position.copy(position);
@@ -28,8 +33,6 @@ function createPBRMaterialUtility(folderName, normalScale, heightScale, tiling)
 	var roughness = loadTextureUtility(folderName, 'roughness.png', tiling);
 	var height = loadTextureUtility(folderName, 'height.png', tiling);
 
-	var cubemap = loadCubemapUtility("environment", "env");
-
 	var material = new THREE.MeshStandardMaterial({
 		color: 0xffffff,
 		map: baseColor,
@@ -39,7 +42,7 @@ function createPBRMaterialUtility(folderName, normalScale, heightScale, tiling)
 		roughnessMap: roughness,
 		displacementMap: height,
 		displacementScale: heightScale,
-		envMap: cubemap
+		envMap: scene.background
 	});
 
 	return material;
@@ -50,24 +53,27 @@ function createCustomMaterialUtility(folderName, normalScale, heightScale, tilin
 	var normalmap = loadTextureUtility(folderName, 'normal.png', tiling);
 	var roughness = loadTextureUtility(folderName, 'roughness.png', tiling);
 	var heightmap = loadTextureUtility(folderName, 'height.png', tiling);
-	var cubemap = loadCubemapUtility("environment", "env");
+
     uniforms = {
         u_basemap: { type: "t", value: basemap },
-		u_normalmap: {type: "t", value: normalmap},
-		u_heightmap: {type: "t", value: heightmap},
+		u_normalmap: {type: "t", value: normalmap },
+		u_heightmap: {type: "t", value: roughness },
+		u_roughness: {type: "t", value: heightmap },
+		u_envMap: {type: "t", value: scene.background},
+
 		u_normalScale: {type: "f", value: normalScale},
-		u_roughness: {type: "t", value: roughness},
 		u_heightScale: {type: "f", value: heightScale},
 		u_tiling: {type: "v2", value: tiling},
-		u_tCube: {type: "t", value: cubemap},
+		
+		u_roughnessRemap: {type: "v2", value: new THREE.Vector2(0.0, 1.0)}
     };
 	
-	uniforms = THREE.UniformsUtils.merge([
+	materialUniforms = THREE.UniformsUtils.merge([
 		THREE.UniformsLib['lights'],
 		uniforms]);
 
     var material = new THREE.ShaderMaterial( {
-        uniforms: uniforms,
+        uniforms: materialUniforms,
         vertexShader: VERTEX_SHADER,
         fragmentShader: FRAGMENT_SHADER,
 		lights: true,
@@ -88,14 +94,14 @@ function loadTextureUtility(folderName, textureName, tiling) {
 function loadCubemapUtility(folderName, textureName) {
 	var texture = new THREE.CubeTextureLoader()
 	.setPath( 'scene-content/' + folderName + '/' )
-	.load( [
+	.load([
 		textureName + 'px.png',
 		textureName + 'nx.png',
 		textureName + 'py.png',
 		textureName + 'ny.png',
 		textureName + 'pz.png',
 		textureName + 'nz.png'
-	] );
+	]);
 	texture.format = THREE.RGBFormat;
 	return texture;
 }
