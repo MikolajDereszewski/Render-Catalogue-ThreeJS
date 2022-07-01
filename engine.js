@@ -7,18 +7,14 @@ let VERTEX_SHADER = "", FRAGMENT_SHADER = "";
 let scene, renderer, statistics, camera;
 let GUI;
 
-initializeEngine();
-initializeDebugger();
-
 function initializeEngine() {
 	scene = initializeScene();
 	renderer = initializeRenderer();
-	propertyGUI = initializeGui();
 }
 
 function initializeGui() {
 	var gui = new dat.GUI();
-	return gui;
+	propertyGUI = gui;
   }
 
 function initializeDebugger() {

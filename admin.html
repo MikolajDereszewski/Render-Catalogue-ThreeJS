@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<title>Render Catalogue</title>
+		<link rel="stylesheet" href="adminStyles.css">
+	</head>
+	<body>
+		<h1>Upload texture files</h1>
+		<form action="fileUpload.php" method="post">
+			<label for="setid">Texture Set ID</label><br>
+			<input id="setid" name="setid" type="text"/><br>
+
+			<label for="basemap">Base Map:</label><br>
+			<input id="basemap" name="basemap" type="file" accept="image/png"/><br>
+
+			<label for="normal">Normal Map:</label><br>
+			<input id="normal" name="normal" type="file" accept="image/png"/><br>
+
+			<label for="metallic">Metallic Map:</label><br>
+			<input id="metallic" name="metallic" type="file" accept="image/png"/><br>
+
+			<label for="roughness">Roughness Map:</label><br>
+			<input id="roughness" name="roughness" type="file" accept="image/png"/><br>
+
+			<label for="AO">Ambient Occlusion Map:</label><br>
+			<input id="AO" name="AO" type="file" accept="image/png"/><br>
+
+			<label for="height">Height Map:</label><br>
+			<input id="height" name="height" type="file" accept="image/png"/><br>
+			<br><br>
+			<input type = "button" onclick="initializeGameContent()" value="Generate"/><br>
+			<input type = "submit" value="Upload"/>
+		</form>
+		<script src="node_modules/three/build/three.min.js"></script>
+		<script src="node_modules/three/examples/js/controls/OrbitControls.js"></script>
+		<script src="node_modules/stats.js/build/stats.min.js"></script>
+		<script src="node_modules/dat.gui/build/dat.gui.min.js"></script>
+        <script src="engine.js"></script>
+        <script src="utilities.js"></script>
+        <script src="previewContent.js"></script>
+	</body>
+</html>

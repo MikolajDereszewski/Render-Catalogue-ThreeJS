@@ -86,8 +86,56 @@ function createCustomMaterialUtility(folderName, normalScale, heightScale, tilin
     return material;
 }
 
+function createCustomMaterialPreviewUtility(normalScale, heightScale, tiling) {
+	var basemap = loadTexturePreviewUtility('basemap', tiling);
+	var normalmap = loadTexturePreviewUtility('normal', tiling);
+	var roughness = loadTexturePreviewUtility('roughness', tiling);
+	var heightmap = loadTexturePreviewUtility('height', tiling);
+	var AO = loadTexturePreviewUtility('AO', tiling);
+
+    uniforms = {
+        u_basemap: { type: "t", value: basemap },
+		u_normalmap: {type: "t", value: normalmap },
+		u_heightmap: {type: "t", value: roughness },
+		u_roughness: {type: "t", value: heightmap },
+		u_AO: {type: "t", value: AO},
+		u_envMap: {type: "t", value: scene.background},
+
+		u_normalScale: {type: "f", value: normalScale},
+		u_heightScale: {type: "f", value: heightScale},
+		u_AOScale: {type: "f", value: 1.0},
+		u_tiling: {type: "v2", value: tiling},
+		
+		u_roughnessRemap: {type: "v2", value: new THREE.Vector2(0.0, 1.0)},
+    };
+	
+	materialUniforms = THREE.UniformsUtils.merge([
+		THREE.UniformsLib['lights'],
+		uniforms]);
+
+    var material = new THREE.ShaderMaterial( {
+        uniforms: materialUniforms,
+        vertexShader: VERTEX_SHADER,
+        fragmentShader: FRAGMENT_SHADER,
+		lights: true,
+		shading: THREE.SmoothShading
+    } );
+
+    return material;
+}
+
 function loadTextureUtility(folderName, textureName, tiling) {
 	var texture = new THREE.TextureLoader().load( 'scene-content/' + folderName + '/' + textureName );
+	texture.repeat = tiling;
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
+	return texture;
+}
+
+function loadTexturePreviewUtility(textureName, tiling) {
+	var file = document.getElementById(textureName).files[0];
+	var url = window.URL.createObjectURL(new Blob([file], {type: "image/png"}));
+	var texture = new THREE.TextureLoader().load( url );
 	texture.repeat = tiling;
 	texture.wrapS = THREE.RepeatWrapping;
 	texture.wrapT = THREE.RepeatWrapping;

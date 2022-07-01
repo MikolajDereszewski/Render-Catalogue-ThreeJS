@@ -2,6 +2,10 @@ let controls;
 let mainSphere;
 let sphereMaterial;
 
+initializeEngine();
+initializeGui();
+initializeDebugger();
+
 fetch("./basicVertex.glsl").then(function(response) {
 	return response.text().then(function(text) {
 		VERTEX_SHADER = text;
