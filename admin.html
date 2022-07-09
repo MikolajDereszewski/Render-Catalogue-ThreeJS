@@ -26,19 +26,19 @@ function openPreviewWindow() {
 	window.open(url,'popup','width=500,height=500');
 }
 		</script>
-		<form action="preview.html" method="get" target="popup" onsubmit="window.open('about:blank','popup','width=500,height=500');">
+		<!--<form action="preview.html" method="get" target="popup" onsubmit="window.open('about:blank','popup','width=500,height=500');">
 			<label for="setid">Texture Set ID</label><br>
 			<input id="data_id" name="data_id" type="text"/><br>
 			<input type = "submit" value="Preview"/>
 		</form>
 
-		<br><br><br><br>
+		<br><br><br><br>-->
 		<h2>Upload texture files</h2>
-		<form action="fileUpload.html" method="get">
+		<form action="fileUpload" method="post">
 			<label for="setid">Texture Set ID</label><br>
 			<input id="setid" name="setid" type="text"/><br>
 
-			<label for="basemap">Base Map:</label><br>
+			<!--<label for="basemap">Base Map:</label><br>
 			<input id="basemap" name="basemap" type="file" accept="image/png"/><br>
 
 			<label for="normal">Normal Map:</label><br>
@@ -56,12 +56,12 @@ function openPreviewWindow() {
 			<label for="height">Height Map:</label><br>
 			<input id="height" name="height" type="file" accept="image/png"/><br>
 
-			<br><br>
+			<br><br>-->
 			<input type = "submit" value="Upload"/>
-			<input type = "button" value="Add to DB" onclick="insertMaterial();"/>
-			<input type = "button" value="Clear DB" onclick="clearDatabase();"/>
-			<input type = "button" method="get" target="popup" onclick="openPreviewWindow();" value="Preview"/>
+			<!--<input type = "button" value="Add to DB" onclick="insertMaterial(document.getElementById(setid).textContent)"/>
+			<input type = "button" method="get" target="popup" onclick="openPreviewWindow();" value="Preview"/>-->
 		</form>
+		<br><br><br><br>
 		
 	</body>
 </html>

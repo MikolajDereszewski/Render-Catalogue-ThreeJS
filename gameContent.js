@@ -95,7 +95,22 @@ function initializeProperties() {
 		}
 	);
 
-	var loadIce = { add : function() {
+	const xhttp = new XMLHttpRequest();
+  	xhttp.onloadend = function() {
+		console.log(this.responseText);
+		var arr = JSON.parse(this.responseText);
+		console.log(arr);
+		arr.forEach(function(item) {
+			var load = { add : function() {
+				reloadMaterialTextures(item, new THREE.Vector2(1, 1));
+			}};
+			propertyGUI.add(load,'add').name(item);
+		});
+  	}
+  	xhttp.open("GET", "/catalogue.html");
+  	xhttp.send();
+
+	/*var loadIce = { add : function() {
 		reloadMaterialTextures("ice_resources", new THREE.Vector2(1, 1));
 	}};
 	propertyGUI.add(loadIce,'add').name("Load Ice");
@@ -110,7 +125,7 @@ function initializeProperties() {
 	var loadTiles = { add : function() {
 		reloadMaterialTextures("brick_resources", new THREE.Vector2(2, 2));
 	}};
-	propertyGUI.add(loadTiles,'add').name("Load Bricks");
+	propertyGUI.add(loadTiles,'add').name("Load Bricks");*/
 }
 
 function initializeEnvironment() {
