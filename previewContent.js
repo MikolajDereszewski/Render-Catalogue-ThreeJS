@@ -80,5 +80,6 @@ function onWindowResize() {
 function onShaderLoaded() {
 	if(VERTEX_SHADER != "" && FRAGMENT_SHADER != "") {
 		shaderLoadedCallback = true;
+		initializeGameContent();
 	}
 }

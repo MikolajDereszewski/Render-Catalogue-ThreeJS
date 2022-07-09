@@ -8,6 +8,26 @@
 	</head>
 	<body>
 		<h1>Upload texture files</h1>
+		<script>
+function createImageURL(textureName) {
+	var file = document.getElementById(textureName).files[0];
+	var url = window.URL.createObjectURL(new Blob([file], {type: "image/png"}));
+	console.log(url);
+	window.open(url, '_blank');
+	return url;
+}
+
+function openPreviewWindow() {
+	var basemap = createImageURL("basemap");
+	var normal = createImageURL("normal");
+	var metallic = createImageURL("metallic");
+	var roughness = createImageURL("roughness");
+	var AO = createImageURL("AO");
+	var height = createImageURL("height");
+	var url = "preview.php?basemap="+basemap+"&normal="+normal+"&metallic="+metallic+"&roughness="+roughness+"&AO="+AO+"&height="+height;
+	window.open(url,'popup'/*,'width=500,height=500'*/);
+}
+		</script>
 		<form action="fileUpload.php" method="post">
 			<label for="setid">Texture Set ID</label><br>
 			<input id="setid" name="setid" type="text"/><br>
@@ -29,16 +49,16 @@
 
 			<label for="height">Height Map:</label><br>
 			<input id="height" name="height" type="file" accept="image/png"/><br>
+
 			<br><br>
-			<input type = "button" onclick="initializeGameContent()" value="Generate"/><br>
 			<input type = "submit" value="Upload"/>
+			<input type = "button" method="get" target="popup" onclick="openPreviewWindow()" value="Preview"/>
 		</form>
-		<script src="node_modules/three/build/three.min.js"></script>
-		<script src="node_modules/three/examples/js/controls/OrbitControls.js"></script>
-		<script src="node_modules/stats.js/build/stats.min.js"></script>
-		<script src="node_modules/dat.gui/build/dat.gui.min.js"></script>
-        <script src="engine.js"></script>
-        <script src="utilities.js"></script>
-        <script src="previewContent.js"></script>
+		<br><br><br><br>
+		<form action="preview.php" method="get" target="popup" onsubmit="window.open('about:blank','popup','width=500,height=500');">
+			<label for="setid">Texture Set ID</label><br>
+			<input id="id" name="id" type="text"/><br>
+			<input type = "submit" value="Preview"/>
+		</form>
 	</body>
 </html>
