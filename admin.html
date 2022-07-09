@@ -3,11 +3,10 @@
 	<head>
 		<meta charset=utf-8>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<title>Render Catalogue</title>
-		<link rel="stylesheet" href="adminStyles.css">
+		<title>Render Catalogue Admin</title>
 	</head>
 	<body>
-		<h1>Upload texture files</h1>
+		<h1>Texture Catalogue CMS</h1>
 		<script>
 function createImageURL(textureName) {
 	var file = document.getElementById(textureName).files[0];
@@ -22,11 +21,20 @@ function openPreviewWindow() {
 	var roughness = createImageURL("roughness");
 	var AO = createImageURL("AO");
 	var height = createImageURL("height");
-	var url = "preview.php?data_id=&basemap="+basemap+"&normal="+normal+"&metallic="+metallic+"&roughness="+roughness+"&AO="+AO+"&height="+height;
+	
+	var url = "preview.html?data_id=&basemap="+basemap+"&normal="+normal+"&metallic="+metallic+"&roughness="+roughness+"&AO="+AO+"&height="+height;
 	window.open(url,'popup','width=500,height=500');
 }
 		</script>
-		<form action="fileUpload.php" method="post">
+		<form action="preview.html" method="get" target="popup" onsubmit="window.open('about:blank','popup','width=500,height=500');">
+			<label for="setid">Texture Set ID</label><br>
+			<input id="data_id" name="data_id" type="text"/><br>
+			<input type = "submit" value="Preview"/>
+		</form>
+
+		<br><br><br><br>
+		<h2>Upload texture files</h2>
+		<form action="fileUpload.html" method="get">
 			<label for="setid">Texture Set ID</label><br>
 			<input id="setid" name="setid" type="text"/><br>
 
@@ -50,13 +58,10 @@ function openPreviewWindow() {
 
 			<br><br>
 			<input type = "submit" value="Upload"/>
-			<input type = "button" method="get" target="popup" onclick="openPreviewWindow()" value="Preview"/>
+			<input type = "button" value="Add to DB" onclick="insertMaterial();"/>
+			<input type = "button" value="Clear DB" onclick="clearDatabase();"/>
+			<input type = "button" method="get" target="popup" onclick="openPreviewWindow();" value="Preview"/>
 		</form>
-		<br><br><br><br>
-		<form action="preview.php" method="get" target="popup" onsubmit="window.open('about:blank','popup','width=500,height=500');">
-			<label for="setid">Texture Set ID</label><br>
-			<input id="data_id" name="data_id" type="text"/><br>
-			<input type = "submit" value="Preview"/>
-		</form>
+		
 	</body>
 </html>

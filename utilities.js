@@ -88,20 +88,18 @@ function createCustomMaterialUtility(folderName, normalScale, heightScale, tilin
 
 function createCustomMaterialPreviewUtility(normalScale, heightScale, tiling) {
 	var id = document.getElementById("data_id");
-	console.log(id);
 	if(id != null) {
 		var passedData = id.textContent;
-		console.log(passedData);
 		if(passedData != null && passedData != "") {
 			return createCustomMaterialUtility(passedData, normalScale, heightScale, tiling);
 		}
 	}
 
-	var basemap = loadTexturePreviewURLUtility('data_basemap', tiling);
-	var normalmap = loadTexturePreviewURLUtility('data_normal', tiling);
-	var roughness = loadTexturePreviewURLUtility('data_roughness', tiling);
-	var heightmap = loadTexturePreviewURLUtility('data_height', tiling);
-	var AO = loadTexturePreviewURLUtility('data_AO', tiling);
+	var basemap = loadTexturePreviewURLUtility('basemap', tiling);
+	var normalmap = loadTexturePreviewURLUtility('normal', tiling);
+	var roughness = loadTexturePreviewURLUtility('roughness', tiling);
+	var heightmap = loadTexturePreviewURLUtility('height', tiling);
+	var AO = loadTexturePreviewURLUtility('AO', tiling);
 
     uniforms = {
         u_basemap: { type: "t", value: basemap },
@@ -154,6 +152,7 @@ function loadTexturePreviewUtility(textureName, tiling) {
 
 function loadTexturePreviewURLUtility(urlID, tiling) {
 	var url = document.getElementById(urlID).textContent;
+	console.log(url);
 	var texture = new THREE.TextureLoader().load( url );
 	texture.repeat = tiling;
 	texture.wrapS = THREE.RepeatWrapping;

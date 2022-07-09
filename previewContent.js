@@ -2,6 +2,7 @@ let controls;
 let mainSphere;
 let sphereMaterial;
 let shaderLoadedCallback = false;
+let initializeGameContentCallback = false;
 
 initializeEngine();
 
@@ -20,8 +21,10 @@ fetch("./basicFragment.glsl").then(function(response) {
 });
 
 function initializeGameContent() {
-	if(!shaderLoadedCallback)
+	if(!shaderLoadedCallback) {
+		initializeGameContentCallback=true;
 		return;
+	}
 	while(scene.children.length > 0){ 
 		scene.remove(scene.children[0]); 
 	}
@@ -80,6 +83,8 @@ function onWindowResize() {
 function onShaderLoaded() {
 	if(VERTEX_SHADER != "" && FRAGMENT_SHADER != "") {
 		shaderLoadedCallback = true;
-		initializeGameContent();
+		if(initializeGameContentCallback) {
+			initializeGameContent();
+		}
 	}
 }
