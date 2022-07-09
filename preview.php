@@ -7,7 +7,7 @@
 		<link rel="stylesheet" href="styles.css">
 	</head>
     <body>
-        <div id="data" style="display: none;"><?php echo $_GET["id"]; ?></div>
+        <div id="data_id" style="display: none;"><?php echo $_GET["data_id"]; ?></div>
         <div id="data_basemap" style="display: none;"><?php echo $_GET["basemap"]; ?></div>
         <div id="data_normal" style="display: none;"><?php echo $_GET["normal"]; ?></div>
         <div id="data_metallic" style="display: none;"><?php echo $_GET["metallic"]; ?></div>

@@ -12,8 +12,6 @@
 function createImageURL(textureName) {
 	var file = document.getElementById(textureName).files[0];
 	var url = window.URL.createObjectURL(new Blob([file], {type: "image/png"}));
-	console.log(url);
-	window.open(url, '_blank');
 	return url;
 }
 
@@ -24,8 +22,8 @@ function openPreviewWindow() {
 	var roughness = createImageURL("roughness");
 	var AO = createImageURL("AO");
 	var height = createImageURL("height");
-	var url = "preview.php?basemap="+basemap+"&normal="+normal+"&metallic="+metallic+"&roughness="+roughness+"&AO="+AO+"&height="+height;
-	window.open(url,'popup'/*,'width=500,height=500'*/);
+	var url = "preview.php?data_id=&basemap="+basemap+"&normal="+normal+"&metallic="+metallic+"&roughness="+roughness+"&AO="+AO+"&height="+height;
+	window.open(url,'popup','width=500,height=500');
 }
 		</script>
 		<form action="fileUpload.php" method="post">
@@ -57,7 +55,7 @@ function openPreviewWindow() {
 		<br><br><br><br>
 		<form action="preview.php" method="get" target="popup" onsubmit="window.open('about:blank','popup','width=500,height=500');">
 			<label for="setid">Texture Set ID</label><br>
-			<input id="id" name="id" type="text"/><br>
+			<input id="data_id" name="data_id" type="text"/><br>
 			<input type = "submit" value="Preview"/>
 		</form>
 	</body>
