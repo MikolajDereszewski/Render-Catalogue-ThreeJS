@@ -1,6 +1,7 @@
 let controls;
 let mainSphere;
 let sphereMaterial;
+let propertiesInitialized=false;
 
 initializeEngine();
 initializeGui();
@@ -24,8 +25,6 @@ function initializeGameContent() {
 	camera = initializeCamera(createVectorUtility(0.6, 0.1, 0.6), createEulerUtility(-10, 45, 0, "YXZ"));
 	initializeControls();
 	initializeEnvironment();
-	initializeSphere('ice_resources');
-	initializeProperties();
 	renderer.setAnimationLoop( update );
 	window.addEventListener( 'resize', onWindowResize );
 }
@@ -35,30 +34,36 @@ function initializeControls() {
 	controls.update();
 }
 
-function initializeSphere(folderName) {
+function initializeSphere(materialData) {
 	var sphereGeometry = new THREE.SphereGeometry( 0.2, 500, 500 );
 	sphereGeometry.computeTangents();
-	sphereMaterial = createCustomMaterialUtility(folderName, 1.0, 0.002, new THREE.Vector2(1, 1));
+	sphereMaterial = createCustomMaterialUtility(materialData, 1.0, 0.002, new THREE.Vector2(1, 1));
 	mainSphere = createGeometryUtility(sphereGeometry, sphereMaterial, createVectorUtility(0, 0, 0), createEulerUtility(0, 0, 0), true, false);
 	//mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('ice_resources', new THREE.Vector2(1, 1), 0.002, new THREE.Vector2(1, 1)), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
 }
 
-function reloadMaterialTextures(folderName, tiling) {
+function reloadMaterialTextures(materialData, tiling) {
 	if(sphereMaterial) {
-		var basemap = loadTextureUtility(folderName, 'basemap.png', tiling);
-		var normalmap = loadTextureUtility(folderName, 'normal.png', tiling);
-		var roughness = loadTextureUtility(folderName, 'roughness.png', tiling);
-		var heightmap = loadTextureUtility(folderName, 'height.png', tiling);
-		var AO = loadTextureUtility(folderName, 'AO.png', tiling);
+		var basemap = loadTextureUtility(materialData.albedo, tiling);
+		var normalmap = loadTextureUtility(materialData.normal, tiling);
+		var roughness = loadTextureUtility(materialData.roughness, tiling);
+		var heightmap = loadTextureUtility(materialData.height, tiling);
+		var AO = loadTextureUtility(materialData.AO, tiling);
 		sphereMaterial.uniforms['u_basemap'].value = basemap;
 		sphereMaterial.uniforms['u_normalmap'].value = normalmap;
 		sphereMaterial.uniforms['u_roughness'].value = roughness;
 		sphereMaterial.uniforms['u_heightmap'].value = heightmap;
 		sphereMaterial.uniforms['u_AO'].value = AO;
+	} else {
+		initializeSphere(materialData);
+		initializeProperties();
 	}
 }
 
 function initializeProperties() {
+	if(propertiesInitialized) {
+		return;
+	}
 	propertyGUI.add(materialUniforms.u_normalScale, 'value', 0.0, 5.0).name("Normal Scale").listen().onChange(
 		function() {
 			sphereMaterial.uniforms['u_normalScale'].value = materialUniforms.u_normalScale.value;
@@ -94,38 +99,14 @@ function initializeProperties() {
 			sphereMaterial.uniforms['u_roughnessRemap'].value.y = materialUniforms.u_roughnessRemap.value.y;
 		}
 	);
+	propertiesInitialized = true;
 
-	const xhttp = new XMLHttpRequest();
-  	xhttp.onloadend = function() {
-		console.log(this.responseText);
-		var arr = JSON.parse(this.responseText);
-		console.log(arr);
-		arr.forEach(function(item) {
-			var load = { add : function() {
-				reloadMaterialTextures(item, new THREE.Vector2(1, 1));
-			}};
-			propertyGUI.add(load,'add').name(item);
-		});
-  	}
-  	xhttp.open("GET", "/catalogue.html");
-  	xhttp.send();
-
-	/*var loadIce = { add : function() {
-		reloadMaterialTextures("ice_resources", new THREE.Vector2(1, 1));
-	}};
-	propertyGUI.add(loadIce,'add').name("Load Ice");
-	var loadTiles = { add : function() {
-		reloadMaterialTextures("tiles_resources", new THREE.Vector2(2, 1));
-	}};
-	propertyGUI.add(loadTiles,'add').name("Load Tiles");
-	var loadTiles = { add : function() {
-		reloadMaterialTextures("rock_resources", new THREE.Vector2(2, 2));
-	}};
-	propertyGUI.add(loadTiles,'add').name("Load Rock");
-	var loadTiles = { add : function() {
-		reloadMaterialTextures("brick_resources", new THREE.Vector2(2, 2));
-	}};
-	propertyGUI.add(loadTiles,'add').name("Load Bricks");*/
+	/*loadMaterialData(function(material) {
+		var load = { add : function() {
+			reloadMaterialTextures(material, new THREE.Vector2(1, 1));
+		}};
+		propertyGUI.add(load,'add').name(material);
+	});*/
 }
 
 function initializeEnvironment() {
@@ -149,7 +130,9 @@ function initializeLights() {
 }
 
 function update( time ) {
-	mainSphere.rotation.y = time / 4000;
+	if(mainSphere != null) {
+		mainSphere.rotation.y = time / 4000;
+	}
 	controls.update();
 	renderer.render( scene, camera );
 	if(DEBUG_MODE) {

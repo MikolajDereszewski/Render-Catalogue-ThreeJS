@@ -6,7 +6,6 @@
 		<title>Render Catalogue Admin</title>
 	</head>
 	<body>
-		<h1>Texture Catalogue CMS</h1>
 		<script>
 function createImageURL(textureName) {
 	var file = document.getElementById(textureName).files[0];
@@ -26,42 +25,44 @@ function openPreviewWindow() {
 	window.open(url,'popup','width=500,height=500');
 }
 		</script>
-		<!--<form action="preview.html" method="get" target="popup" onsubmit="window.open('about:blank','popup','width=500,height=500');">
-			<label for="setid">Texture Set ID</label><br>
-			<input id="data_id" name="data_id" type="text"/><br>
-			<input type = "submit" value="Preview"/>
-		</form>
-
-		<br><br><br><br>-->
+		<h1>Texture Catalogue CMS</h1>
 		<h2>Upload texture files</h2>
-		<form action="fileUpload" method="post">
+		<form action="fileUpload.html" method="post" enctype="multipart/form-data">
 			<label for="setid">Texture Set ID</label><br>
 			<input id="setid" name="setid" type="text"/><br>
-
-			<!--<label for="basemap">Base Map:</label><br>
+			<label for="basemap">Base Map:</label><br>
 			<input id="basemap" name="basemap" type="file" accept="image/png"/><br>
-
 			<label for="normal">Normal Map:</label><br>
 			<input id="normal" name="normal" type="file" accept="image/png"/><br>
-
 			<label for="metallic">Metallic Map:</label><br>
 			<input id="metallic" name="metallic" type="file" accept="image/png"/><br>
-
 			<label for="roughness">Roughness Map:</label><br>
 			<input id="roughness" name="roughness" type="file" accept="image/png"/><br>
-
 			<label for="AO">Ambient Occlusion Map:</label><br>
 			<input id="AO" name="AO" type="file" accept="image/png"/><br>
-
 			<label for="height">Height Map:</label><br>
 			<input id="height" name="height" type="file" accept="image/png"/><br>
-
-			<br><br>-->
+			<br><br>
 			<input type = "submit" value="Upload"/>
-			<!--<input type = "button" value="Add to DB" onclick="insertMaterial(document.getElementById(setid).textContent)"/>
-			<input type = "button" method="get" target="popup" onclick="openPreviewWindow();" value="Preview"/>-->
+			<input type="button" value="Preview" onclick="openPreviewWindow()"/>
 		</form>
 		<br><br><br><br>
-		
+		<h2>Textures CMS</h2>
+		<div id="cmsList">
+		</div>
+		<script src="materialLoader.js"></script>
+		<script>
+loadMaterialData(function(material) {
+	var onClick = 'window.open("preview.html?data_id=' + material.name + '","popup","width=500,height=500");';
+	var element = document.createElement("input");
+    element.setAttribute("type", "button");
+    element.setAttribute("value", material.name);
+    element.setAttribute("onclick", onClick);
+	var br = document.createElement("br");
+    var list = document.getElementById("cmsList");
+    list.appendChild(element);
+    list.appendChild(br);
+});
+		</script>
 	</body>
 </html>

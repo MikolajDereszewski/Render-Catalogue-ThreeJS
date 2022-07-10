@@ -25,22 +25,22 @@ function createLightUtility(color, intensity, distance, position, castShadow) {
 	return light;
 }
 
-function createPBRMaterialUtility(folderName, normalScale, heightScale, tiling)
+function createPBRMaterialUtility(materialData, normalScale, heightScale, tiling)
 {
-	var baseColor = loadTextureUtility(folderName, 'basemap.png', tiling);
-	var normal = loadTextureUtility(folderName, 'normal.png', tiling);
-	var metallic = loadTextureUtility(folderName, 'metallic.png', tiling);
-	var roughness = loadTextureUtility(folderName, 'roughness.png', tiling);
-	var height = loadTextureUtility(folderName, 'height.png', tiling);
+	var basemap = loadTextureUtility(materialData.albedo, tiling);
+	var normalmap = loadTextureUtility(materialData.normal, tiling);
+	var roughness = loadTextureUtility(materialData.roughness, tiling);
+	var heightmap = loadTextureUtility(materialData.height, tiling);
+	var AO = loadTextureUtility(materialData.AO, tiling);
 
 	var material = new THREE.MeshStandardMaterial({
 		color: 0xffffff,
-		map: baseColor,
-		normalMap: normal,
+		map: basemap,
+		normalMap: normalmap,
 		normalScale: normalScale,
 		metalnessMap: metallic,
 		roughnessMap: roughness,
-		displacementMap: height,
+		displacementMap: heightmap,
 		displacementScale: heightScale,
 		envMap: scene.background
 	});
@@ -48,12 +48,12 @@ function createPBRMaterialUtility(folderName, normalScale, heightScale, tiling)
 	return material;
 }
 
-function createCustomMaterialUtility(folderName, normalScale, heightScale, tiling) {
-	var basemap = loadTextureUtility(folderName, 'basemap.png', tiling);
-	var normalmap = loadTextureUtility(folderName, 'normal.png', tiling);
-	var roughness = loadTextureUtility(folderName, 'roughness.png', tiling);
-	var heightmap = loadTextureUtility(folderName, 'height.png', tiling);
-	var AO = loadTextureUtility(folderName, 'AO.png', tiling);
+function createCustomMaterialUtility(materialData, normalScale, heightScale, tiling) {
+	var basemap = loadTextureUtility(materialData.albedo, tiling);
+	var normalmap = loadTextureUtility(materialData.normal, tiling);
+	var roughness = loadTextureUtility(materialData.roughness, tiling);
+	var heightmap = loadTextureUtility(materialData.height, tiling);
+	var AO = loadTextureUtility(materialData.AO, tiling);
 
     uniforms = {
         u_basemap: { type: "t", value: basemap },
@@ -132,8 +132,8 @@ function createCustomMaterialPreviewUtility(normalScale, heightScale, tiling) {
     return material;
 }
 
-function loadTextureUtility(folderName, textureName, tiling) {
-	var texture = new THREE.TextureLoader().load( 'scene-content/' + folderName + '/' + textureName );
+function loadTextureUtility(textureName, tiling) {
+	var texture = new THREE.TextureLoader().load( textureName );
 	texture.repeat = tiling;
 	texture.wrapS = THREE.RepeatWrapping;
 	texture.wrapT = THREE.RepeatWrapping;

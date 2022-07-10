@@ -25,12 +25,20 @@ function createCollection() {
     });
 }
 
-function insertMaterial(materialID) {
+function insertMaterial(materialID, albedoName, normalName, metallicName, roughnessName, AOName, heightName) {
     MongoClient.connect(dburl, function(err, db) {
         if (err)
             throw err;
         var database = db.db("catalogue");
-        var obj = { name: materialID };
+        var obj = {
+            name: materialID,
+            albedo: albedoName,
+            normal: normalName,
+            metallic: metallicName,
+            roughness: roughnessName,
+            AO: AOName,
+            height: heightName
+        };
         console.log("Try insert into collection");
         database.collection("materials").insertOne(obj, function(err, res) {
             if (err)
@@ -76,7 +84,7 @@ function getUploadedResources(callback) {
         if (err)
             throw err;
         var database = db.db("catalogue");
-        database.collection("materials").find({}, { projection: { _id: 0, name: 1 } }).toArray(function(err, result) {
+        database.collection("materials").find({}, { projection: { _id: 0 } }).toArray(function(err, result) {
             if (err)
                 throw err;
             console.log(result);
@@ -86,48 +94,78 @@ function getUploadedResources(callback) {
     });
 }
 
+function uploadFile(file, id, callback) {
+    //console.log(file);
+    if(file==null) {
+        callback('null');
+    }
+    var oldpath = file.filepath;
+    var path = 'D:/Projekty/Render-Catalogue-ThreeJS/scene-content/' + id + '/'
+    var newpath = path + file.originalFilename;
+    if (!fs.existsSync(path)) {
+        fs.mkdirSync(path);
+    }
+    fs.copyFile(oldpath, newpath, function (err) {
+        if (err)
+            throw err;
+        callback('scene-content/' + id + '/' + file.originalFilename);
+    });
+}
+
 http.createServer(function (req, res) {
     var q = url.parse(req.url, true);
     var awaitEnd=false;
     var awaitContent=false;
-    var headPassed=false;
 
-    if (req.url == '/fileUpload') {
+    if (req.url == '/fileUpload.html') {
+        awaitEnd = true;
         var form = new formidable.IncomingForm();
         form.parse(req, function (err, fields, files) {
-            console.log(fields);
-            insertMaterial(fields.setid);
-        });
-        q = url.parse(req.url + ".html", true);
-    }
-
-    if(req.url == "/admin.html") {
-        awaitEnd=true;
-        getUploadedResources(function(result) {
-            if(!headPassed) {
-                res.writeHead(200, {'Content-Type': 'text/html'});
-                headPassed = true;
+            if(fields.setid == null || fields.setid == "") {
+                if(!awaitContent) {
+                    return res.end();
+                } else {
+                    awaitEnd = false;
+                }
             }
-            result.forEach(function(item) {
-                var onClick = '\'window.open("preview.html?data_id=' + item.name + '","popup","width=500,height=500");\'';
-                res.write('<input type = "button" value = "Preview ' + item.name + '" onClick=' + onClick + '/><br>')
-            });
-            if(!awaitContent) {
-                return res.end();
-            } else {
-                awaitEnd = false;
+            else {
+                uploadFile(files.basemap, fields.setid, function(albedoName) {
+                    uploadFile(files.normal, fields.setid, function(normalName) {
+                        uploadFile(files.metallic, fields.setid, function(metallicName) {
+                            uploadFile(files.roughness, fields.setid, function(roughnessName) {
+                                uploadFile(files.AO, fields.setid, function(AOName) {
+                                    uploadFile(files.height, fields.setid, function(heightName) {
+                                        insertMaterial(fields.setid, albedoName, normalName, metallicName, roughnessName, AOName, heightName);
+                                        if(!awaitContent) {
+                                            return res.end();
+                                        } else {
+                                            awaitEnd = false;
+                                        }
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
             }
         });
     }
-
     if(req.url == "/catalogue.html") {
         res.writeHead(200, {'Content-Type': 'text/plain'});
         getUploadedResources(function(result) {
-            var nameArray = [];
+            var dataArray = [];
             result.forEach(function(item) {
-                nameArray.push(item.name);
+                dataArray.push( {
+                    name: item.name,
+                    albedo: item.albedo,
+                    normal: item.normal,
+                    metallic: item.metallic,
+                    roughness: item.roughness,
+                    AO: item.AO,
+                    height: item.height
+                });
             });
-            var json = JSON.stringify(nameArray);
+            var json = JSON.stringify(dataArray);
             console.log(json);
             res.write(json);
             return res.end();
@@ -144,10 +182,7 @@ http.createServer(function (req, res) {
                 res.writeHead(404, {'Content-Type': 'text/html'});
                 return res.end("404 not found");
             } 
-            if(!headPassed) {
-                res.writeHead(200, {'Content-Type': 'text/html'});
-                headPassed = true;
-            }
+            res.writeHead(200, {'Content-Type': 'text/html'});
             res.write(data);
             if(!awaitEnd) {
                 return res.end();
@@ -158,17 +193,6 @@ http.createServer(function (req, res) {
     }
 }).listen(8080);
 
-clearDatabase();
-createCollection();
-//insertMaterial("ice_resources");
-//logDatabase();
-//insertMaterial("ice_resources");
-//insertMaterial("brick_resources");
-//insertMaterial("tiles_resources");
-//logDatabase();
-
-/*var myEventHandler = function () {
-    console.log('I hear a scream!');
-}
-eventEmitter.on('scream', myEventHandler);
-eventEmitter.emit('scream');*/
+logDatabase();
+//clearDatabase();
+//createCollection();
