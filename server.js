@@ -87,7 +87,20 @@ function getUploadedResources(callback) {
         database.collection("materials").find({}, { projection: { _id: 0 } }).toArray(function(err, result) {
             if (err)
                 throw err;
-            console.log(result);
+            callback(result);
+            db.close();
+        });
+    });
+}
+
+function getSingleUploadedResource(name, callback) {
+    MongoClient.connect(dburl, function(err, db) {
+        if (err)
+            throw err;
+        var database = db.db("catalogue");
+        database.collection("materials").find({"name" : name}, { projection: { _id: 0 } }).toArray(function(err, result) {
+            if (err)
+                throw err;
             callback(result);
             db.close();
         });
@@ -150,7 +163,44 @@ http.createServer(function (req, res) {
             }
         });
     }
-    if(req.url == "/catalogue.html") {
+    if(q.pathname == "/material") {
+        res.writeHead(200, {'Content-Type': 'text/plain'});
+        var name = q.query.name;
+        if(name == null || name == "") {
+            if(!awaitContent) {
+                return res.end();
+            } else {
+                awaitEnd = false;
+            }
+        }
+        else {
+            getSingleUploadedResource(name, function(result) {
+                if(result == null || result.length == 0) {
+                    if(!awaitContent) {
+                        return res.end();
+                    } else {
+                        awaitEnd = false;
+                    }
+                } else {
+                    var data = {
+                        name: result[0].name,
+                        albedo: result[0].albedo,
+                        normal: result[0].normal,
+                        metallic: result[0].metallic,
+                        roughness: result[0].roughness,
+                        AO: result[0].AO,
+                        height: result[0].height
+                    };
+                    console.log(data);
+                    var json = JSON.stringify(data);
+                    res.write(json);
+                    return res.end();
+                }
+                
+            });
+        }
+    }
+    else if(req.url == "/catalogue.html") {
         res.writeHead(200, {'Content-Type': 'text/plain'});
         getUploadedResources(function(result) {
             var dataArray = [];

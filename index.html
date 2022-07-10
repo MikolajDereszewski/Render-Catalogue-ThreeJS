@@ -15,20 +15,20 @@
         <script src="engine.js"></script>
         <script src="utilities.js"></script>
         <script src="gameContent.js"></script>
-		<script>
-var index = 0;
-var materialDatas = [];
-		</script>
 		<div id="cmsList" style="position: fixed; top: 50px; left: 0px; cursor: pointer; z-index: 10000;">
 		</div>
 		<script>
-loadMaterialData(function(material) {
-	materialDatas.push(material);
-	var onClick = 'reloadMaterialTextures(materialDatas[' + index + '], new THREE.Vector2(1, 1))';
-	index+=1;
+function updateMaterial(name, tiling) {
+	loadSingleMaterialData(name, function(materialData) {
+		reloadMaterialTextures(materialData, tiling);
+	});
+}
+
+loadMaterialData(function(materialData) {
+	var onClick = 'updateMaterial("' + materialData.name + '", new THREE.Vector2(1, 1))';
 	var element = document.createElement("input");
 	element.setAttribute("type", "button");
-	element.setAttribute("value", material.name);
+	element.setAttribute("value", materialData.name);
 	element.setAttribute("onclick", onClick);
 	var br = document.createElement("br");
 	var list = document.getElementById("cmsList");
