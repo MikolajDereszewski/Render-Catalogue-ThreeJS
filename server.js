@@ -9,6 +9,7 @@ var {MongoClient} = require('mongodb');
 var dburl = "mongodb://localhost:27017/";
 
 var formidable = require('formidable');
+var uuid = require('uuid');
 
 function createCollection() {
     MongoClient.connect(dburl, function(err, db) {
@@ -37,13 +38,46 @@ function insertMaterial(materialID, albedoName, normalName, metallicName, roughn
             metallic: metallicName,
             roughness: roughnessName,
             AO: AOName,
-            height: heightName
+            height: heightName,
+            u_normalScale: 1.0,
+            u_heightScale: 0.0,
+            u_AOScale: 1.0,
+            u_tiling_x: 1,
+            u_tiling_y: 1,
+            u_roughnessRemap_x: 0.0,
+            u_roughnessRemap_y: 1.0
         };
         console.log("Try insert into collection");
         database.collection("materials").insertOne(obj, function(err, res) {
             if (err)
                 throw err;
             console.log("Inserted into db: " + obj);
+            logDatabase();
+            db.close();
+        });
+    });
+}
+
+function updateMaterialUniforms(materialID, uniforms) {
+    MongoClient.connect(dburl, function(err, db) {
+        if (err)
+            throw err;
+        var database = db.db("catalogue");
+        var query = { name: materialID };
+        var newUniforms = { $set:{
+            u_normalScale: uniforms.u_normalScale,
+            u_heightScale: uniforms.u_heightScale,
+            u_AOScale: uniforms.u_AOScale,
+            u_tiling_x: uniforms.u_tiling_x,
+            u_tiling_y: uniforms.u_tiling_y,
+            u_roughnessRemap_x: uniforms.u_roughnessRemap_x,
+            u_roughnessRemap_y: uniforms.u_roughnessRemap_y
+        }};
+        console.log("Try update collection");
+        database.collection("materials").updateOne(query, newUniforms, function(err, res) {
+            if (err)
+                throw err;
+            console.log("1 document updated");
             logDatabase();
             db.close();
         });
@@ -125,11 +159,68 @@ function uploadFile(file, id, callback) {
     });
 }
 
+const users = {
+    "admin": "1234"
+}
+
+class Session {
+    constructor(username, expiresAt) {
+        this.username = username
+        this.expiresAt = expiresAt
+    }
+    
+    isExpired() {
+        this.expiresAt < (new Date())
+    }
+}
+
+const sessions = {}
+
+function parseCookies (request) {
+    const list = {};
+    const cookieHeader = request.headers?.cookie;
+    if (!cookieHeader) return list;
+
+    cookieHeader.split(`;`).forEach(function(cookie) {
+        let [ name, ...rest] = cookie.split(`=`);
+        name = name?.trim();
+        if (!name) return;
+        const value = rest.join(`=`).trim();
+        if (!value) return;
+        list[name] = decodeURIComponent(value);
+    });
+
+    return list;
+}
+
+function isUserLogged(req) {
+    var cookies = parseCookies(req);
+    if (!cookies) {
+        return false;
+    } else {
+        const sessionToken = cookies['session_token']
+        if (!sessionToken) {
+            return false;
+        } else {
+            userSession = sessions[sessionToken]
+            if (!userSession) {
+                return false;
+            } else {
+                if (userSession.isExpired()) {
+                    delete sessions[sessionToken];
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+    }
+}
+
 http.createServer(function (req, res) {
     var q = url.parse(req.url, true);
     var awaitEnd=false;
     var awaitContent=false;
-
     if (req.url == '/fileUpload.html') {
         awaitEnd = true;
         var form = new formidable.IncomingForm();
@@ -163,7 +254,75 @@ http.createServer(function (req, res) {
             }
         });
     }
-    if(q.pathname == "/material") {
+    if (req.url == '/update') {
+        awaitEnd = true;
+        q = url.parse("/admin", true);
+        var form = new formidable.IncomingForm();
+        form.parse(req, function (err, fields, files) {
+            if(fields.updateid == null || fields.updateid == "") {
+                if(!awaitContent) {
+                    return res.end();
+                } else {
+                    awaitEnd = false;
+                }
+            }
+            else {
+                var uniforms = {
+                    u_normalScale: fields.u_normalScale,
+                    u_heightScale: fields.u_heightScale,
+                    u_AOScale: fields.u_AOScale,
+                    u_tiling_x: fields.u_tiling_x,
+                    u_tiling_y: fields.u_tiling_y,
+                    u_roughnessRemap_x: fields.u_roughnessRemap_x,
+                    u_roughnessRemap_y: fields.u_roughnessRemap_y
+                }
+                console.log(uniforms);
+                updateMaterialUniforms(fields.updateid, uniforms);
+            }
+        });
+    }
+    if(q.pathname == "/admin" || q.pathname == "/admin.html") {
+        q = url.parse("/admin.html", true);
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        var form = new formidable.IncomingForm();
+        form.parse(req, function (err, fields, files) {
+            if(!isUserLogged(req)) {
+                var login = fields.login;
+                var password = fields.password;
+                if (!login || !password) {
+                    q = url.parse("/login.html", true);
+                } else {
+                    const expectedPassword = users[login];
+                    if (!expectedPassword || expectedPassword !== password) {
+                        q = url.parse("/login.html", true);
+                    }
+                    else {
+                        const sessionToken = uuid.v4();
+                        const now = new Date();
+                        const expiresAt = new Date(+now + 3600 * 1000);
+                        const session = new Session(login, expiresAt);
+                        sessions[sessionToken] = session;
+                        console.log(sessionToken);
+                        res.writeHead(200, {
+                            'Set-Cookie': 'session_token='+sessionToken.toString()+'; expires='+expiresAt.toUTCString()+'; path=/;"',
+                            'Content-Type': 'text/html'
+                        });
+                        console.log(res.cookieHeader);
+                    }
+                }
+            }
+            var filename = "." + q.pathname;
+            fs.readFile(filename, function(err, data) {
+                if (err) {
+                    res.writeHead(404, {'Content-Type': 'text/html'});
+                    return res.end("404 not found");
+                }
+                res.write(data);
+                return res.end();
+            });
+        });
+    }
+    else if(q.pathname == "/material") {
         res.writeHead(200, {'Content-Type': 'text/plain'});
         var name = q.query.name;
         if(name == null || name == "") {
@@ -189,9 +348,15 @@ http.createServer(function (req, res) {
                         metallic: result[0].metallic,
                         roughness: result[0].roughness,
                         AO: result[0].AO,
-                        height: result[0].height
+                        height: result[0].height,
+                        u_normalScale: result[0].u_normalScale,
+                        u_heightScale: result[0].u_heightScale,
+                        u_AOScale: result[0].u_AOScale,
+                        u_tiling_x: result[0].u_tiling_x,
+                        u_tiling_y: result[0].u_tiling_y,
+                        u_roughnessRemap_x: result[0].u_roughnessRemap_x,
+                        u_roughnessRemap_y: result[0].u_roughnessRemap_y
                     };
-                    console.log(data);
                     var json = JSON.stringify(data);
                     res.write(json);
                     return res.end();
@@ -212,11 +377,17 @@ http.createServer(function (req, res) {
                     metallic: item.metallic,
                     roughness: item.roughness,
                     AO: item.AO,
-                    height: item.height
+                    height: item.height,
+                    u_normalScale: item.u_normalScale,
+                    u_heightScale: item.u_heightScale,
+                    u_AOScale: item.u_AOScale,
+                    u_tiling_x: item.u_tiling_x,
+                    u_tiling_y: item.u_tiling_y,
+                    u_roughnessRemap_x: item.u_roughnessRemap_x,
+                    u_roughnessRemap_y: item.u_roughnessRemap_y
                 });
             });
             var json = JSON.stringify(dataArray);
-            console.log(json);
             res.write(json);
             return res.end();
         });

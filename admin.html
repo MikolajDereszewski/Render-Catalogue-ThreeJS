@@ -52,16 +52,63 @@ function openPreviewWindow() {
 		</div>
 		<script src="materialLoader.js"></script>
 		<script>
+function createNumberField(form, id, labelText, min, max, step, defaultValue) {
+	var label = document.createElement("label");
+	label.setAttribute("for", id);
+	label.append(labelText);
+	var input = document.createElement("input");
+	input.setAttribute("id", id);
+	input.setAttribute("name", id);
+	input.setAttribute("type", "number");
+	input.setAttribute("min", min);
+	input.setAttribute("max", max);
+	input.setAttribute("step", step);
+	input.setAttribute("value", defaultValue);
+	form.appendChild(label);
+	form.appendChild(input);
+	form.appendChild(document.createElement("br"));
+	return form;
+}
+
+var list = document.getElementById("cmsList");
 loadMaterialData(function(material) {
-	var onClick = 'window.open("preview.html?data_id=' + material.name + '","popup","width=500,height=500");';
-	var element = document.createElement("input");
-    element.setAttribute("type", "button");
-    element.setAttribute("value", material.name);
-    element.setAttribute("onclick", onClick);
-	var br = document.createElement("br");
-    var list = document.getElementById("cmsList");
-    list.appendChild(element);
-    list.appendChild(br);
+	var header = document.createElement("h3");
+	header.append(material.name);
+
+	var form = document.createElement("form");
+	form.setAttribute("action", "update");
+	form.setAttribute("method", "post");
+	var hiddenID = document.createElement("input");
+	hiddenID.setAttribute("id", "updateid");
+	hiddenID.setAttribute("name", "updateid");
+	hiddenID.setAttribute("type", "text");
+	hiddenID.setAttribute("value", material.name);
+	hiddenID.setAttribute("style", "display: none;");
+	form.appendChild(hiddenID);
+	form = createNumberField(form, "u_normalScale", "Normal Scale", 0.0, 5.0, 0.01, material.u_normalScale);
+	form = createNumberField(form, "u_heightScale", "Height Scale", 0.0, 0.1, 0.001, material.u_heightScale);
+	form = createNumberField(form, "u_AOScale", "AO Intensity", 0.0, 1.0, 0.01, material.u_AOScale);
+	form = createNumberField(form, "u_tiling_x", "Tiling X", 0, 10, 1, material.u_tiling_x);
+	form = createNumberField(form, "u_tiling_y", "Tiling Y", 0, 10, 1, material.u_tiling_y);
+	form = createNumberField(form, "u_roughnessRemap_x", "Roughness Remap Min", 0.0, 1.0, 0.01, material.u_roughnessRemap_x);
+	form = createNumberField(form, "u_roughnessRemap_y", "Roughness Remap Max", 0.0, 1.0, 0.01, material.u_roughnessRemap_y);
+	var previewButton = document.createElement("input");
+    previewButton.setAttribute("type", "button");
+    previewButton.setAttribute("value", "Preview");
+    previewButton.setAttribute("onclick", 'window.open("preview.html?data_id=' + material.name + '","popup","width=500,height=500");');
+	var updateButton = document.createElement("button");
+	updateButton.setAttribute("type", "submit");
+	updateButton.appendChild(document.createTextNode("Update Uniforms"))
+	form.appendChild(previewButton);
+    form.appendChild(updateButton);
+
+    list.appendChild(header);
+    list.appendChild(document.createTextNode("Default material uniforms"));
+	list.appendChild(document.createElement("br"));
+	list.appendChild(form);
+	list.appendChild(document.createElement("br"));
+    list.appendChild(document.createElement("br"));
+    list.appendChild(document.createElement("br"));
 });
 		</script>
 	</body>

@@ -18,14 +18,14 @@
 		<div id="cmsList" style="position: fixed; top: 50px; left: 0px; cursor: pointer; z-index: 10000;">
 		</div>
 		<script>
-function updateMaterial(name, tiling) {
+function updateMaterial(name) {
 	loadSingleMaterialData(name, function(materialData) {
-		reloadMaterialTextures(materialData, tiling);
+		reloadMaterialTextures(materialData);
 	});
 }
 
 loadMaterialData(function(materialData) {
-	var onClick = 'updateMaterial("' + materialData.name + '", new THREE.Vector2(1, 1))';
+	var onClick = 'updateMaterial("' + materialData.name + '")';
 	var element = document.createElement("input");
 	element.setAttribute("type", "button");
 	element.setAttribute("value", materialData.name);

@@ -44,7 +44,7 @@ function initializeControls() {
 function initializeSphere() {
 	var sphereGeometry = new THREE.SphereGeometry( 0.2, 500, 500 );
 	sphereGeometry.computeTangents();
-	sphereMaterial = createCustomMaterialPreviewUtility(1.0, 0.002, new THREE.Vector2(1, 1));
+	sphereMaterial = createCustomMaterialPreviewUtility();
 	mainSphere = createGeometryUtility(sphereGeometry, sphereMaterial, createVectorUtility(0, 0, 0), createEulerUtility(0, 0, 0), true, false);
 }
 

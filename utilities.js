@@ -25,8 +25,9 @@ function createLightUtility(color, intensity, distance, position, castShadow) {
 	return light;
 }
 
-function createPBRMaterialUtility(materialData, normalScale, heightScale, tiling)
+function createPBRMaterialUtility(materialData)
 {
+	var tiling = new THREE.Vector2(materialData.u_tiling_x, materialData.u_tiling_y);
 	var basemap = loadTextureUtility(materialData.albedo, tiling);
 	var normalmap = loadTextureUtility(materialData.normal, tiling);
 	var metallic = loadTextureUtility(materialData.metallic, tiling);
@@ -37,18 +38,19 @@ function createPBRMaterialUtility(materialData, normalScale, heightScale, tiling
 		color: 0xffffff,
 		map: basemap,
 		normalMap: normalmap,
-		normalScale: normalScale,
+		normalScale: materialData.u_normalScale,
 		metalnessMap: metallic,
 		roughnessMap: roughness,
 		displacementMap: heightmap,
-		displacementScale: heightScale,
+		displacementScale: materialData.u_heightScale,
 		envMap: scene.background
 	});
 
 	return material;
 }
 
-function createCustomMaterialUtility(materialData, normalScale, heightScale, tiling) {
+function createCustomMaterialUtility(materialData) {
+	var tiling = new THREE.Vector2(materialData.u_tiling_x, materialData.u_tiling_y);
 	var basemap = loadTextureUtility(materialData.albedo, tiling);
 	var normalmap = loadTextureUtility(materialData.normal, tiling);
 	var roughness = loadTextureUtility(materialData.roughness, tiling);
@@ -63,12 +65,11 @@ function createCustomMaterialUtility(materialData, normalScale, heightScale, til
 		u_AO: {type: "t", value: AO},
 		u_envMap: {type: "t", value: scene.background},
 
-		u_normalScale: {type: "f", value: normalScale},
-		u_heightScale: {type: "f", value: heightScale},
-		u_AOScale: {type: "f", value: 1.0},
+		u_normalScale: {type: "f", value: materialData.u_normalScale},
+		u_heightScale: {type: "f", value: materialData.u_heightScale},
+		u_AOScale: {type: "f", value: materialData.u_AOScale},
 		u_tiling: {type: "v2", value: tiling},
-		
-		u_roughnessRemap: {type: "v2", value: new THREE.Vector2(0.0, 1.0)},
+		u_roughnessRemap: {type: "v2", value: new THREE.Vector2(materialData.u_roughnessRemap_x, materialData.u_roughnessRemap_y)},
     };
 	
 	materialUniforms = THREE.UniformsUtils.merge([
@@ -86,7 +87,7 @@ function createCustomMaterialUtility(materialData, normalScale, heightScale, til
     return material;
 }
 
-function createCustomMaterialPreviewUtility(normalScale, heightScale, tiling) {
+function createCustomMaterialPreviewUtility() {
 	var material;
 	var basemap, normalmap, roughness, heightmap, AO;
 	var id = document.getElementById("data_id");
@@ -97,16 +98,16 @@ function createCustomMaterialPreviewUtility(normalScale, heightScale, tiling) {
 			loadSingleMaterialData(passedData, function(materialData) {
 				console.log(materialData.name);
 				if(materialData.name == passedData) {
-					appendMaterialData(material, materialData, tiling);
+					appendMaterialData(material, materialData);
 				}
 			});
 		}
 	} else {
-		var basemap = loadTexturePreviewUtility('basemap', tiling);
-		var normalmap = loadTexturePreviewUtility('normal', tiling);
-		var roughness = loadTexturePreviewUtility('roughness', tiling);
-		var heightmap = loadTexturePreviewUtility('height', tiling);
-		var AO = loadTexturePreviewUtility('AO', tiling);
+		var basemap = loadTexturePreviewUtility('basemap', new THREE.Vector2(1.0, 1.0));
+		var normalmap = loadTexturePreviewUtility('normal', new THREE.Vector2(1.0, 1.0));
+		var roughness = loadTexturePreviewUtility('roughness', new THREE.Vector2(1.0, 1.0));
+		var heightmap = loadTexturePreviewUtility('height', new THREE.Vector2(1.0, 1.0));
+		var AO = loadTexturePreviewUtility('AO', new THREE.Vector2(1.0, 1.0));
 	}
 	
     uniforms = {
@@ -116,10 +117,10 @@ function createCustomMaterialPreviewUtility(normalScale, heightScale, tiling) {
 		u_roughness: {type: "t", value: heightmap },
 		u_AO: {type: "t", value: AO},
 		u_envMap: {type: "t", value: scene.background},
-		u_normalScale: {type: "f", value: normalScale},
-		u_heightScale: {type: "f", value: heightScale},
+		u_normalScale: {type: "f", value: 1.0},
+		u_heightScale: {type: "f", value: 0.0},
 		u_AOScale: {type: "f", value: 1.0},
-		u_tiling: {type: "v2", value: tiling},			
+		u_tiling: {type: "v2", value: new THREE.Vector2(1.0, 1.0)},
 		u_roughnessRemap: {type: "v2", value: new THREE.Vector2(0.0, 1.0)}
 	};
 
@@ -139,7 +140,8 @@ function createCustomMaterialPreviewUtility(normalScale, heightScale, tiling) {
     return material;
 }
 
-function appendMaterialData(sphereMaterial, materialData, tiling) {
+function appendMaterialData(sphereMaterial, materialData) {
+	var tiling = new THREE.Vector2(materialData.u_tiling_x, materialData.u_tiling_y);
 	var basemap = loadTextureUtility(materialData.albedo, tiling);
 	var normalmap = loadTextureUtility(materialData.normal, tiling);
 	var roughness = loadTextureUtility(materialData.roughness, tiling);
@@ -150,6 +152,13 @@ function appendMaterialData(sphereMaterial, materialData, tiling) {
 	sphereMaterial.uniforms['u_roughness'].value = roughness;
 	sphereMaterial.uniforms['u_heightmap'].value = heightmap;
 	sphereMaterial.uniforms['u_AO'].value = AO;
+	sphereMaterial.uniforms['u_normalScale'].value = materialData.u_normalScale;
+	sphereMaterial.uniforms['u_heightScale'].value = materialData.u_heightScale;
+	sphereMaterial.uniforms['u_AOScale'].value = materialData.u_AOScale;
+	sphereMaterial.uniforms['u_tiling'].value.x = materialData.u_tiling_x;
+	sphereMaterial.uniforms['u_tiling'].value.y = materialData.u_tiling_y;
+	sphereMaterial.uniforms['u_roughnessRemap'].value.x = materialData.u_roughnessRemap_x;
+	sphereMaterial.uniforms['u_roughnessRemap'].value.y = materialData.u_roughnessRemap_y;
 }
 
 function loadTextureUtility(textureName, tiling) {

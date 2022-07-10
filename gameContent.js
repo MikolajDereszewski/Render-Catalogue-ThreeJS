@@ -37,23 +37,14 @@ function initializeControls() {
 function initializeSphere(materialData) {
 	var sphereGeometry = new THREE.SphereGeometry( 0.2, 500, 500 );
 	sphereGeometry.computeTangents();
-	sphereMaterial = createCustomMaterialUtility(materialData, 1.0, 0.002, new THREE.Vector2(1, 1));
+	sphereMaterial = createCustomMaterialUtility(materialData);
 	mainSphere = createGeometryUtility(sphereGeometry, sphereMaterial, createVectorUtility(0, 0, 0), createEulerUtility(0, 0, 0), true, false);
-	//mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility('ice_resources', new THREE.Vector2(1, 1), 0.002, new THREE.Vector2(1, 1)), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
+	//mainSphere = createGeometryUtility(new THREE.SphereGeometry( 0.2, 250, 250 ), createPBRMaterialUtility(materialData), createVectorUtility(-0.15, 0, 0.15), createEulerUtility(0, 0, 0), true, false);
 }
 
-function reloadMaterialTextures(materialData, tiling) {
+function reloadMaterialTextures(materialData) {
 	if(sphereMaterial) {
-		var basemap = loadTextureUtility(materialData.albedo, tiling);
-		var normalmap = loadTextureUtility(materialData.normal, tiling);
-		var roughness = loadTextureUtility(materialData.roughness, tiling);
-		var heightmap = loadTextureUtility(materialData.height, tiling);
-		var AO = loadTextureUtility(materialData.AO, tiling);
-		sphereMaterial.uniforms['u_basemap'].value = basemap;
-		sphereMaterial.uniforms['u_normalmap'].value = normalmap;
-		sphereMaterial.uniforms['u_roughness'].value = roughness;
-		sphereMaterial.uniforms['u_heightmap'].value = heightmap;
-		sphereMaterial.uniforms['u_AO'].value = AO;
+		appendMaterialData(sphereMaterial, materialData);
 	} else {
 		initializeSphere(materialData);
 		initializeProperties();
@@ -61,9 +52,6 @@ function reloadMaterialTextures(materialData, tiling) {
 }
 
 function initializeProperties() {
-	if(propertiesInitialized) {
-		return;
-	}
 	propertyGUI.add(materialUniforms.u_normalScale, 'value', 0.0, 5.0).name("Normal Scale").listen().onChange(
 		function() {
 			sphereMaterial.uniforms['u_normalScale'].value = materialUniforms.u_normalScale.value;
@@ -99,14 +87,6 @@ function initializeProperties() {
 			sphereMaterial.uniforms['u_roughnessRemap'].value.y = materialUniforms.u_roughnessRemap.value.y;
 		}
 	);
-	propertiesInitialized = true;
-
-	/*loadMaterialData(function(material) {
-		var load = { add : function() {
-			reloadMaterialTextures(material, new THREE.Vector2(1, 1));
-		}};
-		propertyGUI.add(load,'add').name(material);
-	});*/
 }
 
 function initializeEnvironment() {
