@@ -78,18 +78,18 @@ vec3 CalculateNormalsValue()
 void main()
 {
 	vec3 normal = CalculateNormalsValue();
-	vec3 viewDir = normalize(-vPos);
+	vec3 viewDir = -vPos;
 
-	float roughness = clamp(u_roughnessRemap.x + (u_roughnessRemap.y - u_roughnessRemap.x) * texture2D(u_roughness, vUv).r, 0.001, 1.0);
-	float smoothness = clamp(1.0 - roughness, 0.001, 1.0);
+	float roughness = clamp(u_roughnessRemap.x + (u_roughnessRemap.y - u_roughnessRemap.x) * texture2D(u_roughness, vUv).r, 0.001, 0.999);
+	float smoothness = 1.0 - roughness;
 
     vec3 diffuseLight = vec3(0.0, 0.0, 0.0);
 	vec3 specularLight = vec3(0.0, 0.0, 0.0);
 
     for(int l = 0; l < NUM_POINT_LIGHTS; l++)
     {
-        vec3 lightDirection = pointLights[l].position - vPos;
-		vec3 halfVector = normalize(pointLights[l].position + viewDir);
+        vec3 lightDirection = pointLights[l].position + viewDir;
+		vec3 halfVector = normalize(lightDirection);
 		
 		float attenuation = 1.0 / (1.0 + dot(lightDirection, lightDirection));
 
@@ -97,9 +97,9 @@ void main()
 		specularLight += pow(dotClamped(halfVector, normal), smoothness * 100.0) * pointLights[l].color * attenuation;
     }
 
-	float fresnel = pow(dot(viewDir, normal), smoothness);
+	float fresnel = pow(dot(normalize(viewDir), normal) * 0.5 + 0.5, smoothness);
 
-	vec3 diffuseColor = texture2D(u_basemap, vUv).rgb * diffuseLight * fresnel;
+	vec3 diffuseColor = texture2D(u_basemap, vUv).rgb * diffuseLight;
 	vec3 specularColor = specularLight * smoothness;
     vec3 reflectionColor = getLightProbeIndirectRadiance(viewDir, normal, roughness) * (1.0 - fresnel);
     float ambientOcclusion = 1.0 - u_AOScale + u_AOScale * texture2D(u_AO, vUv).r;
