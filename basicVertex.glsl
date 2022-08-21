@@ -10,16 +10,6 @@ varying vec3 vNormal;
 varying vec3 vTangent;
 varying vec3 vBitangent;
 
-vec3 CalculateNormalsValue(vec3 normalHeight)
-{
-    vec3 normalTex = normalHeight * 2.0 - 1.0;
-    normalTex.y *= -1.0;
-    normalTex = normalize( normalTex );
-    mat3 tsb = mat3( normalize( vTangent ), normalize( vBitangent ), normalize( vNormal ) );
-    vec3 normal = tsb * normalTex;
-	return normal;
-}
-
 void main()
 {
     vUv = vec2(uv.x * u_tiling.x, uv.y * u_tiling.y);

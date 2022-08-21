@@ -12,15 +12,15 @@ function initializeEngine() {
 	renderer = initializeRenderer();
 }
 
-function initializeGui() {
-	var gui = new dat.GUI();
-	propertyGUI = gui;
-  }
-
 function initializeDebugger() {
 	if(DEBUG_MODE) {
 		statistics = initializeDebugStatistics();
 	}
+}
+
+function initializeGui() {
+	var gui = new dat.GUI();
+	propertyGUI = gui;
 }
 
 function initializeScene() {
