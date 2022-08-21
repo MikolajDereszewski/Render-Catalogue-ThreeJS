@@ -60,8 +60,8 @@ function createCustomMaterialUtility(materialData) {
     uniforms = {
         u_basemap: { type: "t", value: basemap },
 		u_normalmap: {type: "t", value: normalmap },
-		u_heightmap: {type: "t", value: roughness },
-		u_roughness: {type: "t", value: heightmap },
+		u_heightmap: {type: "t", value: heightmap },
+		u_roughness: {type: "t", value: roughness },
 		u_AO: {type: "t", value: AO},
 		u_envMap: {type: "t", value: scene.background},
 

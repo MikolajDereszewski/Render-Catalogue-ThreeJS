@@ -403,7 +403,7 @@ http.createServer(function (req, res) {
                 res.writeHead(404, {'Content-Type': 'text/html'});
                 return res.end("404 not found");
             } 
-            if(req.url == "/styles.css" || req.url == "/adminStyles.css") {
+            if(req.url == "/styles/styles.css") {
                 res.writeHead(200, {'Content-Type': 'text/css'});
             }
             else {

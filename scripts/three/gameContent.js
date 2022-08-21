@@ -7,14 +7,14 @@ initializeEngine();
 initializeGui();
 initializeDebugger();
 
-fetch("./basicVertex.glsl").then(function(response) {
+fetch("./shaders/vertex.glsl").then(function(response) {
 	return response.text().then(function(text) {
 		VERTEX_SHADER = text;
 		onShaderLoaded();
 	});
 });
 
-fetch("./basicFragment.glsl").then(function(response) {
+fetch("./shaders/fragment.glsl").then(function(response) {
 	return response.text().then(function(text) {
 		FRAGMENT_SHADER = text;
 		onShaderLoaded();
