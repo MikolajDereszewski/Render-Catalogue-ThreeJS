@@ -3,8 +3,9 @@
 	<head>
 		<meta charset=utf-8>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<title>Render Catalogue</title>
+		<link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" type="text/css" href="styles.css">
+		<title>Render Catalogue</title>
 	</head>
 	<body style="margin:0px">
 		<script src="node_modules/three/build/three.min.js"></script>
@@ -15,8 +16,18 @@
         <script src="engine.js"></script>
         <script src="utilities.js"></script>
         <script src="gameContent.js"></script>
-		<div id="cmsList" style="position: fixed; top: 50px; left: 0px; cursor: pointer; z-index: 10000;">
+
+		<div class="section" style="position: fixed; top: 50px; left: 0px; cursor: pointer; z-index: 10000;">
+			<div class="section-title">
+				<h2>Textures Catalogue</h2>
+			</div>
+
+			<div class="section-content">
+				<div id="cmsList">
+				</div>
+			</div>
 		</div>
+
 		<script>
 function updateMaterial(name) {
 	loadSingleMaterialData(name, function(materialData) {
@@ -26,10 +37,18 @@ function updateMaterial(name) {
 
 loadMaterialData(function(materialData) {
 	var onClick = 'updateMaterial("' + materialData.name + '")';
-	var element = document.createElement("input");
-	element.setAttribute("type", "button");
-	element.setAttribute("value", materialData.name);
+	var element = document.createElement("button");
 	element.setAttribute("onclick", onClick);
+
+	var header = document.createElement("h3");
+	header.append(materialData.name);
+	element.appendChild(header);
+
+	var img = document.createElement("img");
+	img.setAttribute("src", materialData.albedo);
+	img.setAttribute("style", "margin: 0px; max-width: 200px; max-height: 200px;")
+	element.appendChild(img);
+
 	var br = document.createElement("br");
 	var list = document.getElementById("cmsList");
 	list.appendChild(element);

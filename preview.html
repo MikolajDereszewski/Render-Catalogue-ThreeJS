@@ -3,8 +3,9 @@
     <head>
 		<meta charset=utf-8>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<title>Preview</title>
-		<link rel="stylesheet" href="styles.css">
+		<link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" type="text/css" href="styles.css">
+        <title>Preview</title>
 	</head>
     <body style="margin:0px">
         <div id="data_id" style="display: none;"></div>
@@ -14,6 +15,7 @@
         <div id="roughness" style="display: none;"></div>
         <div id="AO" style="display: none;"></div>
         <div id="height" style="display: none;"></div>
+
         <script src="node_modules/three/build/three.min.js"></script>
 		<script src="node_modules/three/examples/js/controls/OrbitControls.js"></script>
 		<script src="node_modules/stats.js/build/stats.min.js"></script>
@@ -22,6 +24,7 @@
         <script src="engine.js"></script>
         <script src="utilities.js"></script>
         <script src="previewContent.js"></script>
+        
         <script>
 const params = new URLSearchParams(window.location.search);
 
