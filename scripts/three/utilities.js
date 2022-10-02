@@ -4,6 +4,7 @@ let materialUniforms = {
 };
 
 function createGeometryUtility(geometry, material, position = new THREE.Vector3(0,0,0), rotation = new THREE.Euler(0,0,0), castShadow, receiveShadow) {
+	geometry.attributes.uv2 = geometry.attributes.uv;
 	var mesh = new THREE.Mesh( geometry, material );
 	mesh.position.copy(position);
 	mesh.rotation.copy(rotation);
@@ -33,16 +34,19 @@ function createPBRMaterialUtility(materialData)
 	var metallic = loadTextureUtility(materialData.metallic, tiling);
 	var roughness = loadTextureUtility(materialData.roughness, tiling);
 	var heightmap = loadTextureUtility(materialData.height, tiling);
+	var AO = loadTextureUtility(materialData.AO, tiling);
 
 	var material = new THREE.MeshStandardMaterial({
 		color: 0xffffff,
 		map: basemap,
 		normalMap: normalmap,
-		normalScale: materialData.u_normalScale,
+		normalScale: new THREE.Vector2(materialData.u_normalScale, materialData.u_normalScale),
 		metalnessMap: metallic,
 		roughnessMap: roughness,
 		displacementMap: heightmap,
 		displacementScale: materialData.u_heightScale,
+		aoMap: AO,
+		aoMapIntensity: materialData.u_AOScale,
 		envMap: scene.background
 	});
 

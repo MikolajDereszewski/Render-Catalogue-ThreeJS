@@ -1,14 +1,11 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
-
-var events = require('events');
-var eventEmitter = new events.EventEmitter();
+var formidable = require('formidable');
 
 var {MongoClient} = require('mongodb');
 var dburl = "mongodb://localhost:27017/";
 
-var formidable = require('formidable');
 var uuid = require('uuid');
 
 function createCollection() {
@@ -52,7 +49,7 @@ function insertMaterial(materialID, albedoName, normalName, metallicName, roughn
             if (err)
                 throw err;
             console.log("Inserted into db: " + obj);
-            logDatabase();
+            logCollection();
             db.close();
         });
     });
@@ -78,13 +75,13 @@ function updateMaterialUniforms(materialID, uniforms) {
             if (err)
                 throw err;
             console.log("1 document updated");
-            logDatabase();
+            logCollection();
             db.close();
         });
     });
 }
 
-function clearDatabase() {
+function clearCollection() {
     MongoClient.connect(dburl, function(err, db) {
         if (err)
             throw err;
@@ -99,7 +96,7 @@ function clearDatabase() {
     });
 }
 
-function logDatabase() {
+function logCollection() {
     MongoClient.connect(dburl, function(err, db) {
         if (err)
             throw err;
@@ -142,7 +139,6 @@ function getSingleUploadedResource(name, callback) {
 }
 
 function uploadFile(file, id, callback) {
-    //console.log(file);
     if(file==null) {
         callback('null');
     }
@@ -163,6 +159,8 @@ const users = {
     "admin": "1234"
 }
 
+const sessions = {}
+
 class Session {
     constructor(username, expiresAt) {
         this.username = username
@@ -173,8 +171,6 @@ class Session {
         this.expiresAt < (new Date())
     }
 }
-
-const sessions = {}
 
 function parseCookies (request) {
     const list = {};
@@ -198,11 +194,11 @@ function isUserLogged(req) {
     if (!cookies) {
         return false;
     } else {
-        const sessionToken = cookies['session_token']
+        const sessionToken = cookies['session_token'];
         if (!sessionToken) {
             return false;
         } else {
-            userSession = sessions[sessionToken]
+            userSession = sessions[sessionToken];
             if (!userSession) {
                 return false;
             } else {
@@ -361,7 +357,6 @@ http.createServer(function (req, res) {
                     res.write(json);
                     return res.end();
                 }
-                
             });
         }
     }
@@ -392,6 +387,10 @@ http.createServer(function (req, res) {
             return res.end();
         });
     }
+    else if(req.url == "/server.js") {
+        res.writeHead(403, {'Content-Type': 'text/html'});
+        return res.end();
+    }
     else {
         if(req.url == "/") {
             q = url.parse(req.url + "index.html", true);
@@ -402,7 +401,7 @@ http.createServer(function (req, res) {
             if (err) {
                 res.writeHead(404, {'Content-Type': 'text/html'});
                 return res.end("404 not found");
-            } 
+            }
             if(req.url == "/styles/styles.css") {
                 res.writeHead(200, {'Content-Type': 'text/css'});
             }
@@ -419,6 +418,6 @@ http.createServer(function (req, res) {
     }
 }).listen(8080);
 
-logDatabase();
-//clearDatabase();
+logCollection();
+//clearCollection();
 //createCollection();

@@ -1,4 +1,3 @@
-
 function loadMaterialData(callbackPerMaterial) {
     var xhttp = new XMLHttpRequest();
     xhttp.onloadend = function() {
